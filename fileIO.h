@@ -15,7 +15,5 @@ using namespace std ;
 // May be a global variable to hold FILE * and MMAP char *
 
 // Constructor like function to open file via normal fopen or MMAP open
-// Read a block of specified length from the file
-// Write a block of specified length to the file
 // Fast Read of a block using MMAP
 // Fast write of a block using MMAP

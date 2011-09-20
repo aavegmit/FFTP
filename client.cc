@@ -8,6 +8,8 @@ int main(int argc, char **argv){
 	
 
 	// THREAD - tcp client
+	
+	// Create NumberUDPConnection of udp connections
 	// Thread - udp client
 	
 
