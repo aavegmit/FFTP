@@ -1,9 +1,7 @@
-Fix Makefile
-[R] Implement TCP server-client thread
 [M] Implement UDP server-client thread
 [A] Design TCP read-write thread
 [A] Design UDP read-write thread
-Implement prepareBlock thread
+[M] Implement prepareBlock thread
 Implement processAck
 Implement processMetaData
 Implement Cache - write method
