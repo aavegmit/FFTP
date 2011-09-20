@@ -11,3 +11,10 @@
  */
 
 // Maximum size of the MAP (virtual memory concept as suggested by TEO)
+
+#define TCP_PORT "78471"
+#define MAXDATASIZE 100
+#define TCP_BACKLOG 10
+
+
+

@@ -6,10 +6,23 @@
  * to the receiver side
  *
  */
+#ifndef _CLIENT
+#define _CLIENT
+
+#include "config.h"
 
 #include <iostream>
 #include <cstdio>
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <netdb.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 using namespace std ;
 
 // As per the specs, the command line is going to be the same
@@ -29,3 +42,6 @@ void *UDPconnectionThread(void *);
 void *UDPreadThread(void *);
 
 void *UDPwriteThread(void *);
+
+#endif
+

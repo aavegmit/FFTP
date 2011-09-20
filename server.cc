@@ -1,14 +1,18 @@
 #include "server.h"
 
 
-
 int main(int argc, char **argv){
-	// Thread - Start UDP server 
-	// Thread - Start TCP server
 
+	int rv = 0;
+	
+	// Thread - Start TCP server
+	pthread_t tcpServerThread;	
+	pthread_create(&tcpServerThread, NULL, TCPserverThread, &rv);
 
 	// Wait for the TCP server thread to close
-	// Wait for the UDP server thread to close
+	pthread_join(tcpServerThread, NULL);	
+	
+
 }
 
 // Fetches the unsent/lost blocks from the cache/file

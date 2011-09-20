@@ -1,34 +1,21 @@
-# Macros
+TARGETS=client server
+all: ${TARGETS}
 
-CC = g++
-CFLAGS = -g -Wall -D_REENTRANT
-OBJ = 
-LIBS = -lcrypto -lpthread
-INC = 
-#LIBS = -L/home.scf-22/csci551b/openssl/lib -lcrypto -lnsl -lsocket -lresolv
-#INC = -I/home/scf-22/csci551b/openssl/include
+server: server.o server_tcp.o
+	g++ -o server server.o server_tcp.o -Wall -D_REETRANT -lpthread
 
-# Explicit rule
-all: server client
-
-server: $(OBJ)
-	$(CC) $(CFLAGS) -o server $(OBJ) $(INC) $(LIBS) 
-
-client: $(OBJ)
-	$(CC) $(CFLAGS) -o client $(OBJ) $(INC) $(LIBS) 
-
-install:
-#	cp sv_node bnode1/
-#	cp sv_node bnode2/
-#	cp sv_node bnode3/
-#	cp sv_node nonbnode1/
-#	cp sv_node nonbnode2/	
-
-clean:
-	rm -rf *.o sv_node 
+client: client.o client_tcp.o
+	g++ -o client client.o client_tcp.o -Wall -D_REETRANT -lpthread
 
 server.o: server.cc
-	$(CC) $(CFLAGS) -c server.cc $(INC)
-client.o: client.cc
-	$(CC) $(CFLAGS) -c client.cc $(INC)
+	g++ -c server.cc -Wall -D_REETRANT -lpthread
+
+server_tcp.o: server_tcp.cc
+	g++ -c server_tcp.cc -Wall -D_REETRANT -lpthread
+
+client_tcp.o: client_tcp.cc
+	g++ -c client_tcp.cc -Wall -D_REETRANT -lpthread
+
+clean:
+	rm -rf *.o server client
 
