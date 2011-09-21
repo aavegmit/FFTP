@@ -112,13 +112,32 @@ void *TCPserverThread(void *arg){
 
 }
 
-// Receives meta data
-// initialize the bit vector with either all zero or one
-// initialize the thread - File Input => Compress => Put in queue
-void *TCPreadThread(void *){
-    pthread_exit(0);
+void processReceivedTCPmessage(uint8_t message_type, unsigned char *buffer, uint32_t data_len){
+	if(message_type == 0x1a){
+		handleFileName(buffer, data_len) ;
+	}
+	else if(message_type == 0x2b){
+		handleACKlist(buffer, data_len) ;
+	}
+	else{
+		fprintf(stderr, "TCP message not recognized\n") ;
+	}
 }
 
-void *TCPwriteThread(void *){
-    pthread_exit(0);
+// Receives file name 
+// initialize the bit vector with either all zero or one
+// Creates a list of all the sequence numbers
+// initialize the thread - prepareBlockThread
+void handleFileName(unsigned char *buffer, uint32_t data_len){
+
 }
+
+// Sets the bit vector
+// If a packet is lost, then add it in the  FRONT of the list of
+// sequence numbers
+// Write to cache
+// Clear out the cache for which packets has been received
+void handleACKlist(unsigned char *buffer, uint32_t data_len){
+
+}
+

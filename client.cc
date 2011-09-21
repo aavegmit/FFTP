@@ -28,9 +28,15 @@ int main(int argc, char **argv){
 	    return 0;		
 
 
-	// THREAD - tcp client
+	
+	// Create NumberUDPConnection of udp connections
 	pthread_t tcpConnectionThread;
-	pthread_create(&tcpConnectionThread, NULL, TCPconnectionThread, &rv); 
+	int res = pthread_create(&tcpConnectionThread, NULL, TCPconnectionThread, &rv); 
+	if( res != 0){
+		fprintf(stderr, "TCP Connection thread creation failed\n") ;
+		exit(EXIT_FAILURE) ;
+	}
+	// Thread - udp client
 	
 
 	// Wait for all the threads to stop

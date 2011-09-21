@@ -15,6 +15,6 @@
 #define TCP_PORT "78471"
 #define MAXDATASIZE 100
 #define TCP_BACKLOG 10
-
+#define TCP_HEADER_SIZE 5
 
 

@@ -3,3 +3,27 @@ Clone a repo
 
 Issue the following command 
 	$ git clone aaveg@192.168.0.15:~/USC/CS558/labs/lab5/code
+
+TCP Header format
+-----------------
+
+0-1 bytes 	-	Message type
+1-5 bytes	-	Data length
+
+TCP different messages
+----------------------
+
+1. Metadeta sent from client to the server
+	Type - 0x1a
+
+2. File found + number of packets sent from server to the client
+	Type - 0x1b
+
+3. File not found on the server
+	Type - 0x1c
+
+4. ACK list request from server
+	Type - 0x2a
+
+5. Ack list response from the client
+	Type - 0x2b

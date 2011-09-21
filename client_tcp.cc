@@ -51,37 +51,59 @@ int connetToServer(struct addrinfo* &p, int &sockfd){
 
 void *TCPconnectionThread(void *arg){
 
-    int sockfd = 0, numbytes;  
+    int sockfd = 0;  
     struct addrinfo *p;
-    char buf[MAXDATASIZE];
     char s[INET6_ADDRSTRLEN];
     
     if( connetToServer(p, sockfd) < 0 )
 	pthread_exit(0);
 
     inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr), s, sizeof s);
-    printf("client: connecting to %s\n", s);
+    printf("Client: connecting to %s\n", s);
 
-    if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
-        perror("recv");
-        pthread_exit(0);
+    // Initiate the TCP read thread
+    pthread_t tcpReadThread;
+    int res = pthread_create(&tcpReadThread, NULL, TCPreadThread, (void *)sockfd); 
+    if( res != 0){
+	    fprintf(stderr, "TCP read thread creation failed\n") ;
+	    exit(EXIT_FAILURE) ;
     }
 
-    buf[numbytes] = '\0';
-    printf("client: received '%s'\n",buf);
+    // Initiate the TCP write thread
+    pthread_t tcpWriteThread;
+    res = pthread_create(&tcpWriteThread, NULL, TCPwriteThread, (void *)sockfd); 
+    if( res != 0){
+	    fprintf(stderr, "TCP write thread creation failed\n") ;
+	    exit(EXIT_FAILURE) ;
+    }
+
+    pthread_join(tcpReadThread, NULL);
+    pthread_join(tcpWriteThread, NULL);
     close(sockfd);
- 
     pthread_exit(0);
 }
 
-
-void *TCPreadThread(void *){
-
-    pthread_exit(0);   
+void processReceivedTCPmessage(uint8_t message_type, unsigned char *buffer, uint32_t data_len){
+	if(message_type == 0x1b){
+		handleFileInfo(buffer, data_len) ;
+	}
+	else if(message_type == 0x1c){
+		handleFileNotFound(buffer, data_len) ;
+	}
+	else if(message_type == 0x2a){
+		handleAckRequest(buffer, data_len) ;
+	}
+	else{
+		fprintf(stderr, "TCP message not recognized\n") ;
+	}
 }
 
 
-void *TCPwriteThread(void *){
+void handleFileInfo(unsigned char *buffer, uint32_t data_len){
+}
 
-    pthread_exit(0);
+void handleFileNotFound(unsigned char *buffer, uint32_t data_len){
+}
+
+void handleAckRequest(unsigned char *buffer, uint32_t data_len){
 }

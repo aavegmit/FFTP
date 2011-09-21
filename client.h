@@ -32,23 +32,23 @@ typedef struct paramT{
 }param;
 
 extern param objParam;
-// As per the specs, the command line is going to be the same
-// as scp. something like this: scp aludra.usc.edu:~/file/path/filename destination/file/path/name
-// We can store the parsed arguments such has server hostname, server file path, client file path
-// in a structure
-int parseCommandLine(char **argv) ;
 
+//Threads 
 void *TCPconnectionThread(void *);
-
 void *TCPreadThread(void *);
-
 void *TCPwriteThread(void *);
-
 void *UDPconnectionThread(void *);
-
 void *UDPreadThread(void *);
-
 void *UDPwriteThread(void *);
 
-#endif
+// Methods
+int parseCommandLine(char **argv) ;
+void processReceivedTCPmessage(uint8_t, unsigned char *, uint32_t) ;
+void pushMessageInTCPq(uint8_t, unsigned char *, uint32_t) ;
 
+// Message handlers
+void handleFileInfo(unsigned char *, uint32_t data_len) ;
+void handleFileNotFound(unsigned char *, uint32_t data_len) ;
+void handleAckRequest(unsigned char *, uint32_t data_len) ;
+
+#endif
