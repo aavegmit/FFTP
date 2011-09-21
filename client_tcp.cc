@@ -17,7 +17,7 @@ int connetToServer(struct addrinfo* &p, int &sockfd){
     hints.ai_family = AF_INET;    
     hints.ai_socktype = SOCK_STREAM;
 	
-    if ((rv = getaddrinfo("localhost", TCP_PORT, &hints, &servinfo)) != 0) {
+    if ((rv = getaddrinfo(objParam.serverName.c_str(), TCP_PORT, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return -1;
     }
