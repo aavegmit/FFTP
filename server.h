@@ -5,9 +5,23 @@
 #include <pthread.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <list>
+
 
 using namespace std ;
 
+//structre for UDP server configurations
+
+struct udpSocketData{
+
+	struct sockaddr_in serv_addr;
+	int sockfd;
+};
+
+//message Queue for UDP server write thread
+extern list<unsigned char* > fileDataList;
+extern pthread_mutex_t udpWriteThreadLock;
+extern pthread_cond_t udpWriteThreadCV;
 // List maintaining all the sequence numbers to be sent
 
 void *TCPserverThread(void *);

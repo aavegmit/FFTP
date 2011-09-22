@@ -10,8 +10,15 @@
 #define _CLIENT
 
 #include "shared.h"
-
 using namespace std ;
+
+//structre for UDP server configurations
+struct udpSocketData{
+
+        struct sockaddr_in serv_addr;
+        int sockfd;
+};
+
 
 typedef struct paramT{
     string serverName;

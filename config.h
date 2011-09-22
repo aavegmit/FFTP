@@ -13,8 +13,11 @@
 // Maximum size of the MAP (virtual memory concept as suggested by TEO)
 
 #define TCP_PORT "78471"
-#define MAXDATASIZE 100
+#define MAXDATASIZE 1024
 #define TCP_BACKLOG 10
 #define TCP_HEADER_SIZE 5
-
-
+#define NUM_UDP_CONNECTION 1
+#define CLIENT_NAME "localhost"
+#define FILE_NAME "zen.jpg"
+extern int udpPortList[5] ;
+extern unsigned char clientName[256];
