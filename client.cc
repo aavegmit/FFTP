@@ -27,6 +27,7 @@ int main(int argc, char **argv){
 	if( parseCommandLine(argv) < 0 )
 	    return 0;		
 
+	init() ;
 
 	
 	// Create NumberUDPConnection of udp connections

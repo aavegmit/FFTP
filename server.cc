@@ -4,6 +4,8 @@
 int main(int argc, char **argv){
 
 	int rv = 0;
+
+	init() ;
 	
 	// Thread - Start TCP server
 	pthread_t tcpServerThread;	

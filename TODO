@@ -1,13 +1,12 @@
 [R] Implement command line
 [R] Open up read write threads for tcp server
-[M] Implement UDP server-client thread
-[A] Implement TCP read-write thread
-[A] Design UDP read-write thread
+[R] Implement Cache - write method
 [M] Implement prepareBlock thread
-Implement processMetaData
-Implement processAck
+[A] Design UDP read-write thread
+[A] Implement processAck
+[A] Implement handleAckRequest
 Implement handleFileInfo
-Implement handleAckRequest
-Implement Cache - write method
-Find a compression algo
-Implement compression algo
+Implement processMetaData
+Have the shutdown flags setup
+[*] Find a compression algo
+[*] Implement compression algo
