@@ -90,8 +90,10 @@ void *TCPwriteThread(void *args){
 
 void pushMessageInTCPq(uint8_t message_type, unsigned char * buffer, uint32_t data_len){
     // Construct the unsigned char
+    printf("In pushMessageInTCPq method...\n") ;
     tcpMessage mes ;
     mes.packet = (unsigned char *)malloc((int)data_len+5) ;
+    mes.len = data_len+5 ;
     memcpy(mes.packet, &message_type, 1) ;
     memcpy(mes.packet+1, &data_len, 4) ;
     memcpy(mes.packet+5, buffer, data_len) ;

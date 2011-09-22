@@ -38,12 +38,16 @@ int main(int argc, char **argv){
 		exit(EXIT_FAILURE) ;
 	}
 	// Thread - udp client
-	pthread_t udpConnectionThread;
-	pthread_create(&udpConnectionThread, NULL, UDPconnectionThread, &rv); 
+//	pthread_t udpConnectionThread;
+//	res = pthread_create(&udpConnectionThread, NULL, UDPconnectionThread, &rv); 
+//	if( res != 0){
+//		fprintf(stderr, "UDP Connection thread creation failed\n") ;
+//		exit(EXIT_FAILURE) ;
+//	}
 
 	// Wait for all the threads to stop
-	//pthread_join(tcpConnectionThread, NULL);
-	pthread_join(udpConnectionThread, NULL);
+	pthread_join(tcpConnectionThread, NULL);
+//	pthread_join(udpConnectionThread, NULL);
 	printf("Client Exiting.....\n");
 }
 

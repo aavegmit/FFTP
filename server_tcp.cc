@@ -116,6 +116,13 @@ void *TCPserverThread(void *arg){
 		exit(EXIT_FAILURE) ;
 	    }
 
+	    // ONLY FOR TESTING // DO NOT SUBMIT WITH THIS ////
+	    sleep(5) ;
+	    sendAckRequest() ;
+	    ///////////////////////////////////
+
+
+
 	    pthread_join(tcpReadThread, NULL);
 	    pthread_join(tcpWriteThread, NULL);
 	    //            if (send(new_fd, "Hello, world!", 13, 0) == -1)
@@ -159,3 +166,7 @@ void handleACKlist(unsigned char *buffer, uint32_t data_len){
 
 }
 
+void sendAckRequest(){
+    printf("Sending Ack request\n") ;
+    pushMessageInTCPq(0x2a, NULL, 0);
+}

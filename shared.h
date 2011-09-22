@@ -13,6 +13,7 @@
 #include <arpa/inet.h>
 #include <signal.h>
 #include <list>
+#include <sys/wait.h>
 
 using namespace std ;
 
@@ -30,3 +31,5 @@ void init() ;
 extern list<tcpMessage > tcpMessageQ ;
 extern pthread_mutex_t tcpMessageQLock;
 extern pthread_cond_t tcpMessageQCV;
+
+extern unsigned char *bitV ;
