@@ -4,6 +4,7 @@
 unsigned char *fileMap;  /* mmapped array of int's */
 struct stat fileStat;
 list<uint64_t > sequenceNumberList;
+pthread_mutex_t sequenceNumberListLock;
 
 //function to load file into global variable for MMAP...'fileMap'
 void loadFileToMMap(){
@@ -43,6 +44,7 @@ void unloadFileMap(){
 //populates the sequence number for file
 void populateSequenceNumberList(){
 
+pthread_mutex_lock(&sequenceNumberListLock);
 	uint64_t q = fileStat.st_size/MAXDATASIZE;
 	uint64_t r = fileStat.st_size%MAXDATASIZE;
 
@@ -57,6 +59,7 @@ void populateSequenceNumberList(){
 		sequenceNumberList.pop_front();
 	}
 */
+pthread_mutex_unlock(&sequenceNumberListLock);
 }
 
 void printMMapToFile(){
@@ -69,13 +72,13 @@ FILE *f = fopen("temp", "wb");
 fclose(f);
 }
 
-void getDataFromFile(uint64_t sequenceNum, unsigned char blockData[], uint64_t *size){
+void getDataFromFile(uint64_t sequenceNum, unsigned char blockData[], uint32_t *size){
 
 long int i = 0;
 	if(fileStat.st_size - (off_t)sequenceNum*MAXDATASIZE < MAXDATASIZE){
 		for(i = 0;i<(int)(fileStat.st_size - (off_t)sequenceNum*MAXDATASIZE);i++){
 			blockData[i] = fileMap[(off_t)(sequenceNum*MAXDATASIZE+i)];
-			*size =(uint64_t)( fileStat.st_size - (off_t)sequenceNum*MAXDATASIZE);
+			*size =(uint32_t)( fileStat.st_size - (off_t)sequenceNum*MAXDATASIZE);
 		}
 	}
 	else{

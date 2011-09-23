@@ -36,7 +36,7 @@ void *UDPwriteThread(void *);
 
 // Methods
 int parseCommandLine(char **argv) ;
-void pushMessageInTCPq(uint8_t, unsigned char *, uint32_t) ;
+//void pushMessageInTCPq(uint8_t, unsigned char *, uint32_t) ;
 
 // Message handlers
 void handleFileInfo(unsigned char *, uint32_t data_len) ;
