@@ -4,8 +4,10 @@
 #include "shared.h"
 #include "fileIO.h"
 #include "cache.h"
+#include <sstream>
 #include <pthread.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <signal.h>
 #include <list>
 
@@ -19,6 +21,13 @@ struct udpSocketData{
 	struct sockaddr_in serv_addr;
 	int sockfd;
 };
+
+struct fileInfo{
+    string fileName;
+    struct stat fileStat;
+};
+
+extern struct fileInfo fileInfoObj;
 
 // List maintaining all the sequence numbers to be sent
 

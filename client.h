@@ -24,6 +24,8 @@ typedef struct paramT{
     string serverName;
     string localFilePath;
     string serverFilePath;
+    uint64_t fileSize;
+    uint64_t noOfSeq;
 }param;
 
 extern param objParam;

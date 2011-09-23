@@ -1,4 +1,5 @@
 #include "server.h"
+struct fileInfo fileInfoObj;
 
 // get sockaddr IPV4 or IPV6:
 void *get_in_addr(struct sockaddr *sa)
@@ -153,7 +154,22 @@ void processReceivedTCPmessage(uint8_t message_type, unsigned char *buffer, uint
 // Creates a list of all the sequence numbers
 // initialize the thread - prepareBlockThread
 void handleFileName(unsigned char *buffer, uint32_t data_len){
-
+    fileInfoObj.fileName = (char *) buffer;
+    FILE *fp;
+    fp = fopen(fileInfoObj.fileName.c_str(),"r"); 
+    if(fp==NULL)
+    {
+        cout << fileInfoObj.fileName << "The file doesn't exist " << endl;
+ 	pushMessageInTCPq(0x1c, NULL, 0);
+	return;
+    }
+    if( stat(fileInfoObj.fileName.c_str(), &fileInfoObj.fileStat) < 0)
+	return;	 
+    fclose(fp); 
+    std::stringstream ss;
+    ss << fileInfoObj.fileStat.st_size << "\0";
+    string pktSize = ss.str();
+    pushMessageInTCPq(0x1b,(unsigned char *) pktSize.c_str(), pktSize.size());
 }
 
 // Sets the bit vector

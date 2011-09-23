@@ -83,6 +83,7 @@ void *TCPconnectionThread(void *arg){
     }
 
     // SEND file name to the server using TCP connection
+    pushMessageInTCPq(0x1a,(unsigned char *)objParam.serverFilePath.c_str(), (int)objParam.serverFilePath.size());
 
     pthread_join(tcpReadThread, NULL);
     pthread_join(tcpWriteThread, NULL);
@@ -105,13 +106,21 @@ void processReceivedTCPmessage(uint8_t message_type, unsigned char *buffer, uint
     }
 }
 
-
 void handleFileInfo(unsigned char *buffer, uint32_t data_len){
+    buffer[data_len] = '\0';
+    objParam.fileSize = atoi((char *)buffer);
+    if(objParam.fileSize % MAXDATASIZE == 0 )
+	objParam.noOfSeq = objParam.fileSize/MAXDATASIZE;
+    else
+	objParam.noOfSeq = (objParam.fileSize/MAXDATASIZE) + 1;
+  
+    cout << "no of packets to receive from the server " << objParam.noOfSeq << endl;
 	// Allocate memory to bitV
 	// Start UDP clients
 }
 
 void handleFileNotFound(unsigned char *buffer, uint32_t data_len){
+    cout << "File not found at the server\n";
 }
 
 void handleAckRequest(unsigned char *buffer, uint32_t data_len){

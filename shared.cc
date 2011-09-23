@@ -130,7 +130,6 @@ void pushMessageInTCPq(uint8_t message_type, unsigned char * buffer, uint32_t da
     pthread_mutex_unlock(&tcpMessageQLock) ;
 }
 
-
 void pushMessageInUDPq(uint64_t sequenceNum, uint32_t size, unsigned char *buffer){
     // Construct the unsigned char
     udpMessage mes ;
