@@ -90,6 +90,8 @@ void *TCPserverThread(void *arg){
 
     printf("server: waiting for connections...\n");
 
+    pthread_t tcpReadThread;
+    pthread_t tcpWriteThread;
     while(1) {  // main accept() loop
 	new_fd = 0;	
 	if( acceptRequest(their_addr, sockfd, new_fd) < 0 )
@@ -99,11 +101,14 @@ void *TCPserverThread(void *arg){
 	printf("server: got connection from %s\n", s);
     memcpy(clientName, s, sizeof(s));
 
-	if (!fork()) 
+	if (new_fd < 0){
+	    break ;
+//	    close(new_fd) ;
+	}
+	else
 	{ 
-	    close(sockfd); // child doesn't need the listener
+//	    close(sockfd); // child doesn't need the listener
 	    // Initiate the TCP read thread
-	    pthread_t tcpReadThread;
 	    int res = pthread_create(&tcpReadThread, NULL, TCPreadThread, (void *)new_fd); 
 	    if( res != 0){
 		fprintf(stderr, "TCP read thread creation failed\n") ;
@@ -111,32 +116,17 @@ void *TCPserverThread(void *arg){
 	    }
 
 	    // Initiate the TCP write thread
-	    pthread_t tcpWriteThread;
 	    res = pthread_create(&tcpWriteThread, NULL, TCPwriteThread, (void *)new_fd); 
 	    if( res != 0){
 		fprintf(stderr, "TCP write thread creation failed\n") ;
 		exit(EXIT_FAILURE) ;
 	    }
 
-	    // ONLY FOR TESTING // DO NOT SUBMIT WITH THIS ////
-	    sleep(5) ;
-	    sendAckRequest(10, 100) ;
-	    ///////////////////////////////////
-
-
-
-	    pthread_join(tcpReadThread, NULL);
-	    pthread_join(tcpWriteThread, NULL);
-	    //            if (send(new_fd, "Hello, world!", 13, 0) == -1)
-	    //                perror("send");
-	    close(new_fd);
-	    exit(0);
 	}
-	close(new_fd);  // parent doesn't need this
     }
-
+    pthread_join(tcpReadThread, NULL) ;
+    pthread_join(tcpWriteThread, NULL) ;
     pthread_exit(0);
-
 }
 
 void processReceivedTCPmessage(uint8_t message_type, unsigned char *buffer, uint32_t data_len){
@@ -152,11 +142,11 @@ void processReceivedTCPmessage(uint8_t message_type, unsigned char *buffer, uint
 }
 
 // Receives file name 
-// Creates a list of all the sequence numbers
 // initialize the thread - prepareBlockThread
 void handleFileName(unsigned char *buffer, uint32_t data_len){
     fileInfoObj.fileName = (char *) buffer;
     FILE *fp;
+    int rv = 0 ;
     fp = fopen(fileInfoObj.fileName.c_str(),"r"); 
     if(fp==NULL)
     {
@@ -171,6 +161,10 @@ void handleFileName(unsigned char *buffer, uint32_t data_len){
     ss << fileInfoObj.fileStat.st_size << "\0";
     string pktSize = ss.str();
     pushMessageInTCPq(0x1b,(unsigned char *) pktSize.c_str(), pktSize.size());
+
+    //	Thread writes the data to UDP write thread's list
+    pthread_t PrepareBlockThread;
+    pthread_create(&PrepareBlockThread, NULL, prepareBlockThread, &rv);
 }
 
 // Sets the bit vector

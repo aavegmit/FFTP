@@ -13,7 +13,6 @@ int parseCommandLine(char **argv){
 
     objParam.serverName = objParam.serverName.substr(0,pos);
     objParam.serverFilePath = objParam.serverFilePath.substr(pos+1);
-//	cout << objParam.serverName << "    " << objParam.serverFilePath << endl;
     return 1;
 }
 
@@ -29,9 +28,7 @@ int main(int argc, char **argv){
 	    return 0;		
 
 	init() ;
-
 	
-	// Create NumberUDPConnection of udp connections
 	pthread_t tcpConnectionThread;
 	int res = pthread_create(&tcpConnectionThread, NULL, TCPconnectionThread, &rv); 
 	if( res != 0){

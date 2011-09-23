@@ -37,7 +37,6 @@ int connetToServer(struct addrinfo* &p, int &sockfd){
 	    perror("client: connect");
 	    continue;
 	}
-
 	break;
     }
 
@@ -52,10 +51,6 @@ int connetToServer(struct addrinfo* &p, int &sockfd){
 }
 
 void *TCPconnectionThread(void *arg){
-
-    // ONLY FOR TESTING // REMOVE IT AS SOON AS YOU SEE IT //
-    bitV = (unsigned char *)malloc(1252) ;
-    /////////////////////////////////////////////////////////
     int sockfd = 0;  
     struct addrinfo *p;
     char s[INET6_ADDRSTRLEN];

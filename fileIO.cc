@@ -13,7 +13,7 @@ void loadFileToMMap(){
 
     int fd;
     //File name from Client through TCP
-    fd = open(FILE_NAME, O_RDONLY);
+    fd = open(fileInfoObj.fileName.c_str(), O_RDONLY);
     if (fd == -1) {
         perror("Error opening file for reading");
         exit(EXIT_FAILURE);
@@ -24,7 +24,7 @@ void loadFileToMMap(){
         exit(EXIT_FAILURE);
     }
 
-    fileMap = (unsigned char *)mmap(0, fileStat.st_size, PROT_READ, MAP_SHARED, fd, 0);
+    fileMap = (unsigned char *)mmap(0, fileInfoObj.fileStat.st_size, PROT_READ, MAP_SHARED, fd, 0);
     //fileSize = sb.st_size;
 
     if (fileMap == MAP_FAILED) {
@@ -37,9 +37,9 @@ void loadFileToMMap(){
 //finally unloads the file from fileMap
 void unloadFileMap(){
 
-    if (munmap(fileMap, fileStat.st_size) == -1) {
-        perror("Error un-mmapping the file");
-        exit(EXIT_FAILURE);
+    if (munmap(fileMap, fileInfoObj.fileStat.st_size) == -1) {
+	perror("Error un-mmapping the file");
+	exit(EXIT_FAILURE);
     }
 }
 
@@ -47,8 +47,8 @@ void unloadFileMap(){
 void populateSequenceNumberList(){
 
     pthread_mutex_lock(&sequenceNumberListLock);
-    uint64_t q = fileStat.st_size/MAXDATASIZE;
-    uint64_t r = fileStat.st_size%MAXDATASIZE;
+    uint64_t q = fileInfoObj.fileStat.st_size/MAXDATASIZE;
+    uint64_t r = fileInfoObj.fileStat.st_size%MAXDATASIZE;
 
     for(uint64_t i=0;i<q;i++){
         sequenceNumberList.push_back(i);

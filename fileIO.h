@@ -6,6 +6,10 @@
  * 
  */
 
+#ifndef _FILEIO_H
+#define _FILEIO_H
+
+
 #include "config.h"
 #include <iostream>
 #include <cstdio>
@@ -27,11 +31,14 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
-// Include the MMAP header file for fast I/O
-
 using namespace std ;
 
-// May be a global variable to hold FILE * and MMAP char *
+struct fileInfo{
+    string fileName;
+    struct stat fileStat;
+};
+
+extern struct fileInfo fileInfoObj;
 
 extern unsigned char *fileMap;
 extern struct stat fileStat;
@@ -39,11 +46,6 @@ extern pthread_mutex_t sequenceNumberListLock;
 extern pthread_cond_t sequenceNumberListCV;
 extern list<uint64_t > sequenceNumberList;
 extern unsigned char *mapToFile;
-// Constructor like function to open file via normal fopen or MMAP open
-// Fast Read of a block using MMAP
-// Fast write of a block using MMAP
-
-//read from file
 void printMMapToFile();
 ///loads the file to mmap 'fileMap'
 void loadFileToMMap();
@@ -65,3 +67,4 @@ int loadMMapForFile(unsigned char[]);
 
 //unloads MMap to write into file at client side
 void unloadMMapForFile(int);
+#endif

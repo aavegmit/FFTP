@@ -22,13 +22,6 @@ struct udpSocketData{
 	int sockfd;
 };
 
-struct fileInfo{
-    string fileName;
-    struct stat fileStat;
-};
-
-extern struct fileInfo fileInfoObj;
-
 // List maintaining all the sequence numbers to be sent
 
 void *TCPserverThread(void *);

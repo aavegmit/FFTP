@@ -7,21 +7,16 @@ int main(int argc, char **argv){
     init() ;
 
     // Thread - Start TCP server
-    //pthread_t tcpServerThread;	
-    //pthread_create(&tcpServerThread, NULL, TCPserverThread, &rv);
+    pthread_t tcpServerThread;	
+    pthread_create(&tcpServerThread, NULL, TCPserverThread, &rv);
 
     //Thread - Start UDP Server
     pthread_t udpServerThread;	
     pthread_create(&udpServerThread, NULL, UDPserverThread, &rv);
 
-    //	//Thread writes the data to UDP write thread's list
-    pthread_t PrepareBlockThread;
-    pthread_create(&PrepareBlockThread, NULL, prepareBlockThread, &rv);
-
     // Wait for the TCP server thread to close
-    //pthread_join(tcpServerThread, NULL);	
-    pthread_join(udpServerThread, NULL);	
-    pthread_join(PrepareBlockThread, NULL);
+    pthread_join(tcpServerThread, NULL);	
+    //pthread_join(udpServerThread, NULL);	
 
 
 }
