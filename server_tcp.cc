@@ -150,7 +150,6 @@ void processReceivedTCPmessage(uint8_t message_type, unsigned char *buffer, uint
 }
 
 // Receives file name 
-// initialize the bit vector with either all zero or one
 // Creates a list of all the sequence numbers
 // initialize the thread - prepareBlockThread
 void handleFileName(unsigned char *buffer, uint32_t data_len){
@@ -163,13 +162,22 @@ void handleFileName(unsigned char *buffer, uint32_t data_len){
 // Write to cache
 // Clear out the cache for which packets has been received
 void handleACKlist(unsigned char *buffer, uint32_t data_len){
-    uint64_t seq_num, last_seq_num ;
+    uint64_t seq_num, last_seq_num, current_seq_num ;
     memcpy(&seq_num, buffer, 8) ;
     memcpy(&last_seq_num, buffer + 8, 8) ;
     printf("Server receives a ACK list from the client...%d - %d\n", seq_num, last_seq_num) ;
     for(uint64_t i = (seq_num%8) ; i < last_seq_num - (seq_num / 8)*8 ; ++i){
+	current_seq_num = (seq_num/8)*8 + i ;
 	if(readBit(buffer+16, i) == 0x01){
-	    printf("Packet received - %ld\n", (seq_num/8)*8+i) ;
+	    printf("Packet received - %ld\n", current_seq_num) ;
+	    removeFromUDPPacketCache(current_seq_num) ;
+	}
+	else{
+	    pthread_mutex_lock(&sequenceNumberListLock);
+	    sequenceNumberList.push_front(current_seq_num);
+	    pthread_mutex_unlock(&sequenceNumberListLock);
+	    writeToCache(current_seq_num, getUDPpacketFromSeqNum(current_seq_num), LOST_PACKET ) ;
+	    printf("Packet lost - %d\n", current_seq_num) ;
 	}
     }
 }
@@ -178,7 +186,7 @@ void sendAckRequest(uint64_t seq_num, uint64_t last_seq_num){
     printf("Sending Ack request\n") ;
     unsigned char *buffer = (unsigned char *)malloc(16) ;
     memcpy(buffer, &seq_num, 8) ;
-    memcpy(buffer+8, &last_seq_num, 8) ;
+    memcpy(buffer+8, &last_seq_num, 8);
     pushMessageInTCPq(0x2a, buffer, 16);
     free(buffer) ;
 }

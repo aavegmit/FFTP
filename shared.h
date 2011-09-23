@@ -19,6 +19,7 @@
 #include <list>
 #include <sys/wait.h>
 #include "bitvector.h"
+#include "fileIO.h"
 
 using namespace std ;
 

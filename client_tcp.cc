@@ -82,6 +82,8 @@ void *TCPconnectionThread(void *arg){
 	exit(EXIT_FAILURE) ;
     }
 
+    // SEND file name to the server using TCP connection
+
     pthread_join(tcpReadThread, NULL);
     pthread_join(tcpWriteThread, NULL);
     close(sockfd);
@@ -106,6 +108,7 @@ void processReceivedTCPmessage(uint8_t message_type, unsigned char *buffer, uint
 
 void handleFileInfo(unsigned char *buffer, uint32_t data_len){
 	// Allocate memory to bitV
+	// Start UDP clients
 }
 
 void handleFileNotFound(unsigned char *buffer, uint32_t data_len){

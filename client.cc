@@ -31,13 +31,13 @@ int main(int argc, char **argv){
 
 	
 	// Create NumberUDPConnection of udp connections
-/*	pthread_t tcpConnectionThread;
+	pthread_t tcpConnectionThread;
 	int res = pthread_create(&tcpConnectionThread, NULL, TCPconnectionThread, &rv); 
 	if( res != 0){
 		fprintf(stderr, "TCP Connection thread creation failed\n") ;
 		exit(EXIT_FAILURE) ;
 	}
-*/
+
 	// Thread - udp client
 //	pthread_t udpConnectionThread;
 //	res = pthread_create(&udpConnectionThread, NULL, UDPconnectionThread, &rv); 

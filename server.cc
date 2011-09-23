@@ -1,6 +1,4 @@
 #include "server.h"
-#include "fileIO.h"
-#include "cache.h"
 
 int main(int argc, char **argv){
 
@@ -31,26 +29,11 @@ int main(int argc, char **argv){
 // Fetches the unsent/lost blocks from the cache/file
 // and puts them in the server UDP write queue
 void *prepareBlockThread(void *args){
-    /* 
-     * For all the elements in the list
-     *    Take out the front element
-     *    if sequence number present in cache
-     *          pushBlockInUDPWrite
-     *    else 
-     *    	    Read the block from file
-     *    	    Compress it 
-     *    	    write to cache
-     *    	    pushBlockInUDPWrite
-     *    end
-     * end
-     */
     uint64_t sequenceNum;
     uint32_t size = 0;
     unsigned char *fileData = (unsigned char *)malloc(MAXDATASIZE+1);
     udpMessage mes;
     memset(fileData, '\0',MAXDATASIZE+1);
-
-    //	FILE *f = fopen("image.jpg", "wb");
 
     loadFileToMMap();
     populateSequenceNumberList();
@@ -83,7 +66,6 @@ void *prepareBlockThread(void *args){
 
 
 	//putting the 'fileData' into the list
-	//printf("Packet sent to UDP Message Q....\n");
 	pushMessageInUDPq(sequenceNum, size, fileData);
 
 	memset(fileData, '\0',MAXDATASIZE+1);
@@ -91,7 +73,18 @@ void *prepareBlockThread(void *args){
 	sequenceNumberList.pop_front();
 	pthread_mutex_unlock(&sequenceNumberListLock);
     }
-    //	fclose(f);
     unloadFileMap();
     return 0;
+}
+
+udpMessage getUDPpacketFromSeqNum(uint64_t sequenceNum){
+    uint32_t size = 0;
+    unsigned char *fileData = (unsigned char *)malloc(MAXDATASIZE+1);
+    //READ from mmap
+    getDataFromFile(sequenceNum, fileData, &size);
+
+    //creating a packet from fileData
+    udpMessage mes = getUDPpacketFromData(sequenceNum, size, fileData);
+    free(fileData) ;
+    return mes;
 }

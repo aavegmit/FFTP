@@ -160,8 +160,3 @@ udpMessage getUDPpacketFromData(uint64_t sequenceNum, uint32_t size, unsigned ch
 
 return mes;
 }
-
-
-
-
-

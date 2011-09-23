@@ -2,6 +2,8 @@
 #define _SERVER
 
 #include "shared.h"
+#include "fileIO.h"
+#include "cache.h"
 #include <pthread.h>
 #include <sys/wait.h>
 #include <signal.h>
@@ -36,4 +38,5 @@ void pushBlockInUDPWrite() ;
 //void pushMessageInTCPq(uint8_t, unsigned char *, uint32_t) ;
 
 void sendAckRequest(uint64_t, uint64_t) ;
+udpMessage getUDPpacketFromSeqNum(uint64_t) ;
 #endif
