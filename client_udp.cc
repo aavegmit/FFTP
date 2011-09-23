@@ -1,7 +1,4 @@
 #include "client.h"
-
-int udpPortList[5] = {42000, 42001, 42002, 42003, 42004};
-unsigned char clientName[] = CLIENT_NAME;
 // This thread is invoked from the client main function
 // after command line parsing. It includes setting up a 
 // UDP connection with the UDP server
@@ -33,7 +30,7 @@ void *UDPconnectionThread(void *){
 	
 		udpSocketDataObj = (struct udpSocketData *)malloc(sizeof(struct udpSocketData));
 		udpSocketDataObj->sockfd = sockfd[i];
-		printf("SOCKET IS: %d\n", udpSocketDataObj->sockfd);
+		//printf("SOCKET IS: %d\n", udpSocketDataObj->sockfd);
 		udpSocketDataObj->serv_addr = serv_addr[i];
 		pthread_create(&udpWriteThread[i], NULL, UDPwriteThread, (void *)udpSocketDataObj);
 	        pthread_create(&udpReadThread[i], NULL, UDPreadThread, (void *)udpSocketDataObj);
@@ -55,7 +52,7 @@ void *UDPconnectionThread(void *){
 // bitvector
 void *UDPreadThread(void *temp){
 
-unsigned char msgBuffer[256];
+udpMessage mes;
 //struct sockaddr_storage from;
 struct sockaddr_in from;
 struct udpSocketData *udpSocketDataObj = (struct udpSocketData *)temp;
@@ -66,12 +63,12 @@ int fromlen = 0, n;
 	while (1){
 
 		printf("Waiting for UDP Packet....\n");
-		n = recvfrom(udpSocketDataObj->sockfd,msgBuffer,256,0,(struct sockaddr *)&from,(socklen_t *)&fromlen);
+		n = recvfrom(udpSocketDataObj->sockfd,&mes,sizeof(mes),0,(struct sockaddr *)&from,(socklen_t *)&fromlen);
 		if (n < 0){
 			printf("Error: print on recvfrom");
 			break;
 		}
-		printf("Packet received: %s\n", msgBuffer);
+		printf("Packet received by %d!!!\n", udpSocketDataObj->sockfd);
 	}
 	close(udpSocketDataObj->sockfd);
 	return 0;

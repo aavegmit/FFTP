@@ -18,10 +18,6 @@ struct udpSocketData{
 	int sockfd;
 };
 
-//message Queue for UDP server write thread
-extern list<unsigned char* > fileDataList;
-extern pthread_mutex_t udpWriteThreadLock;
-extern pthread_cond_t udpWriteThreadCV;
 // List maintaining all the sequence numbers to be sent
 
 void *TCPserverThread(void *);
@@ -37,7 +33,7 @@ void handleFileName(unsigned char *, uint32_t) ;
 
 // Push the sequence number and the data
 void pushBlockInUDPWrite() ;
-void pushMessageInTCPq(uint8_t, unsigned char *, uint32_t) ;
+//void pushMessageInTCPq(uint8_t, unsigned char *, uint32_t) ;
 
 void sendAckRequest() ;
 #endif

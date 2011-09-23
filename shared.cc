@@ -4,6 +4,13 @@ list<tcpMessage> tcpMessageQ ;
 pthread_mutex_t tcpMessageQLock;
 pthread_cond_t tcpMessageQCV;
 
+//message Queue for UDP server write thread
+list<udpMessage > udpMessageQ;
+pthread_mutex_t udpMessageQLock;
+pthread_cond_t udpMessageQCV;
+
+int udpPortList[5] = {42000, 42001, 42002, 42003, 42004};
+unsigned char clientName[] = CLIENT_NAME;
 
 void init(){
 
@@ -16,6 +23,20 @@ void init(){
     if (res != 0){
 	fprintf(stderr, "CV init failed\n") ;
     }
+}
+
+void initUDP(){
+
+    int res = pthread_mutex_init(&udpMessageQLock, NULL);
+    if (res != 0){
+	fprintf(stderr, "Lock init failed\n") ;
+    }
+
+    res = pthread_cond_init(&udpMessageQCV, NULL);
+    if (res != 0){
+	fprintf(stderr, "CV init failed\n") ;
+    }
+
 }
 
 void *TCPreadThread(void *args){
@@ -109,6 +130,36 @@ void pushMessageInTCPq(uint8_t message_type, unsigned char * buffer, uint32_t da
     pthread_mutex_unlock(&tcpMessageQLock) ;
 }
 
+
+void pushMessageInUDPq(uint64_t sequenceNum, uint32_t size, unsigned char *buffer){
+    // Construct the unsigned char
+    udpMessage mes ;
+    mes.sequenceNum = sequenceNum;
+    mes.data_len = size;
+    mes.buffer = (unsigned char *)malloc(size) ;
+    memcpy(mes.buffer, buffer, size) ;
+    // Acquire the tcp write thread lock
+    pthread_mutex_lock(&udpMessageQLock) ;
+    // push the unsigned char in Q
+    udpMessageQ.push_back(mes) ;
+    // Signal the write thread to wake up
+    pthread_cond_broadcast(&udpMessageQCV) ;
+    // release the lock
+    pthread_mutex_unlock(&udpMessageQLock) ;
+}
+
+
+udpMessage getUDPpacketFromData(uint64_t sequenceNum, uint32_t size, unsigned char *buffer){
+
+	udpMessage mes;
+
+	mes.sequenceNum = sequenceNum;
+	mes.data_len = size;
+        mes.buffer = (unsigned char *)malloc(size) ;
+	memcpy(mes.buffer, buffer, size) ;
+
+return mes;
+}
 
 
 

@@ -1,11 +1,6 @@
 #include "server.h"
 
 //extern variable declared in server.h
-int udpPortList[5] = {42000, 42001, 42002, 42003, 42004};
-unsigned char clientName[] = CLIENT_NAME;
-list<unsigned char* > fileDataList;
-pthread_mutex_t udpWriteThreadLock;
-pthread_cond_t udpWriteThreadCV;
 
 void *UDPserverThread(void *){
 
@@ -14,8 +9,10 @@ void *UDPserverThread(void *){
     struct hostent *server;
     //struct sockaddr_storage from;
     struct udpSocketData *udpSocketDataObj;
-    pthread_t udpWriteThread[NUM_UDP_CONNECTION];
+    pthread_t udpMessageQ[NUM_UDP_CONNECTION];
     pthread_t udpReadThread[NUM_UDP_CONNECTION];
+
+    initUDP();
 
     	for(int i = 0 ; i < NUM_UDP_CONNECTION; i++){
 	
@@ -45,13 +42,13 @@ void *UDPserverThread(void *){
 		udpSocketDataObj->serv_addr = serv_addr[i];
 		udpSocketDataObj->sockfd = sockfd[i];
 	
-		pthread_create(&udpWriteThread[i], NULL, UDPwriteThread, (void *)udpSocketDataObj);
+		pthread_create(&udpMessageQ[i], NULL, UDPwriteThread, (void *)udpSocketDataObj);
 		pthread_create(&udpReadThread[i], NULL, UDPreadThread, (void *)udpSocketDataObj);
 		memset(&udpSocketDataObj, 0, sizeof(udpSocketDataObj));
 	}
 
 	for(int i = 0;i < NUM_UDP_CONNECTION;i++){
-		pthread_join(udpWriteThread[i], NULL);
+		pthread_join(udpMessageQ[i], NULL);
 		pthread_join(udpReadThread[i], NULL);
 	}
 	return 0;
@@ -69,30 +66,24 @@ void *UDPreadThread(void *udpSocketDataObj){
 void *UDPwriteThread(void *temp){
 
 struct udpSocketData *udpSocketDataObj = (struct udpSocketData *)temp;
-unsigned char *msgBuffer;
+udpMessage mes;
 int n;
 
-	pthread_mutex_init(&udpWriteThreadLock, NULL);
-	pthread_cond_init(&udpWriteThreadCV,NULL);
-
-	printf("Sending UDP packets to client.....\n");
-	fileDataList.push_back((unsigned char *)"Hello");
-	fileDataList.push_back((unsigned char *)"World");
-	fileDataList.push_back((unsigned char *)"!!!!!");
-
 	while(1){
-		
-		if(fileDataList.empty()){
-
+		while(udpMessageQ.empty()){
 			printf("Nothing in message Queue, going on wait\n");
-			pthread_mutex_lock(&udpWriteThreadLock);
-			pthread_cond_wait(&udpWriteThreadCV, &udpWriteThreadLock);
-			pthread_mutex_unlock(&udpWriteThreadLock);
+			pthread_mutex_lock(&udpMessageQLock);
+			pthread_cond_wait(&udpMessageQCV, &udpMessageQLock);
+			pthread_mutex_unlock(&udpMessageQLock);
 		}
 		
-		msgBuffer = fileDataList.front();
-		fileDataList.pop_front();
-		n = sendto(udpSocketDataObj->sockfd, msgBuffer, strlen((char *)msgBuffer), 0,(struct sockaddr *) &udpSocketDataObj->serv_addr,sizeof(udpSocketDataObj->serv_addr));
+		pthread_mutex_lock(&udpMessageQLock);
+		mes = udpMessageQ.front();
+		udpMessageQ.pop_front();
+		pthread_mutex_unlock(&udpMessageQLock);
+
+		printf("Sending UDP Packets to client....%d\n", udpSocketDataObj->sockfd);
+		n = sendto(udpSocketDataObj->sockfd, &mes, sizeof(mes), 0,(struct sockaddr *) &udpSocketDataObj->serv_addr,sizeof(udpSocketDataObj->serv_addr));
 		if (n < 0) {
 			printf("ERROR writing to UDP socket\n");
 			exit(0);
@@ -100,3 +91,4 @@ int n;
 	}
 	return 0;
 }
+

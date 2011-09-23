@@ -18,6 +18,7 @@
 #define TCP_HEADER_SIZE 5
 #define NUM_UDP_CONNECTION 1
 #define CLIENT_NAME "localhost"
-#define FILE_NAME "zen.jpg"
-extern int udpPortList[5] ;
-extern unsigned char clientName[256];
+#define FILE_NAME "/media/My DATA/PICS/WALLPAPERS/google_search.jpg"
+#define RANDOM_PACKET 0
+#define LOST_PACKET 1
+#define MAX_CACHE_SIZE 10
