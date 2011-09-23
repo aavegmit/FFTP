@@ -118,7 +118,7 @@ void *TCPserverThread(void *arg){
 
 	    // ONLY FOR TESTING // DO NOT SUBMIT WITH THIS ////
 	    sleep(5) ;
-	    sendAckRequest() ;
+	    sendAckRequest(10, 100) ;
 	    ///////////////////////////////////
 
 
@@ -163,10 +163,22 @@ void handleFileName(unsigned char *buffer, uint32_t data_len){
 // Write to cache
 // Clear out the cache for which packets has been received
 void handleACKlist(unsigned char *buffer, uint32_t data_len){
-
+    uint64_t seq_num, last_seq_num ;
+    memcpy(&seq_num, buffer, 8) ;
+    memcpy(&last_seq_num, buffer + 8, 8) ;
+    printf("Server receives a ACK list from the client...%d - %d\n", seq_num, last_seq_num) ;
+    for(uint64_t i = (seq_num%8) ; i < last_seq_num - (seq_num / 8)*8 ; ++i){
+	if(readBit(buffer+16, i) == 0x01){
+	    printf("Packet received - %ld\n", (seq_num/8)*8+i) ;
+	}
+    }
 }
 
-void sendAckRequest(){
+void sendAckRequest(uint64_t seq_num, uint64_t last_seq_num){
     printf("Sending Ack request\n") ;
-    pushMessageInTCPq(0x2a, NULL, 0);
+    unsigned char *buffer = (unsigned char *)malloc(16) ;
+    memcpy(buffer, &seq_num, 8) ;
+    memcpy(buffer+8, &last_seq_num, 8) ;
+    pushMessageInTCPq(0x2a, buffer, 16);
+    free(buffer) ;
 }

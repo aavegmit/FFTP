@@ -1,9 +1,9 @@
-[R] Implement command line
 [M] Implement Cache - write method
 [A] Implement processAck
-[A] Implement handleAckRequest
 [R] Implement handleFileInfo
 [R] Implement processMetaData
+[M] UDP destination for server needs to be dynamic
 Have the shutdown flags setup
+Write to file thread
 [*] Find a compression algo
 [*] Implement compression algo

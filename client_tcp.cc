@@ -1,5 +1,7 @@
 #include "client.h"
 
+unsigned char *bitV;
+
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
 {
@@ -51,6 +53,9 @@ int connetToServer(struct addrinfo* &p, int &sockfd){
 
 void *TCPconnectionThread(void *arg){
 
+    // ONLY FOR TESTING // REMOVE IT AS SOON AS YOU SEE IT //
+    bitV = (unsigned char *)malloc(1252) ;
+    /////////////////////////////////////////////////////////
     int sockfd = 0;  
     struct addrinfo *p;
     char s[INET6_ADDRSTRLEN];
@@ -101,14 +106,26 @@ void processReceivedTCPmessage(uint8_t message_type, unsigned char *buffer, uint
 
 void handleFileInfo(unsigned char *buffer, uint32_t data_len){
 	// Allocate memory to bitV
-	// For testing
-	bitV = (unsigned char *)malloc(100) ;
 }
 
 void handleFileNotFound(unsigned char *buffer, uint32_t data_len){
 }
 
 void handleAckRequest(unsigned char *buffer, uint32_t data_len){
-    printf("Server needs a ACK list\n") ;
+    uint64_t seq_num, last_seq_num ;
+    memcpy(&seq_num, buffer, 8) ;
+    memcpy(&last_seq_num, buffer+8, 8) ;
+    printf("Server needs a ACK list %d - %d\n", seq_num, last_seq_num) ;
+    // TESTING -- REMOVE IT IF YOU SEE THIS
+    writeBit(bitV, 29, 0x01) ;
+    writeBit(bitV, 79, 0x01) ;
+    // /////////////////////////////////////
     // get bitvector
+    int part_bv_len = (last_seq_num - seq_num)/8 + 17 ;
+    unsigned char *part_bv = (unsigned char *)malloc(part_bv_len) ;
+    getBitVector(bitV, seq_num, last_seq_num, part_bv+16) ;
+    memcpy(part_bv, &seq_num, 8) ;
+    memcpy(part_bv+8, &last_seq_num, 8) ;
+
+    pushMessageInTCPq(0x2b, part_bv, part_bv_len) ; 
 }

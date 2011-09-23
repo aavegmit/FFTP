@@ -35,5 +35,5 @@ void handleFileName(unsigned char *, uint32_t) ;
 void pushBlockInUDPWrite() ;
 //void pushMessageInTCPq(uint8_t, unsigned char *, uint32_t) ;
 
-void sendAckRequest() ;
+void sendAckRequest(uint64_t, uint64_t) ;
 #endif

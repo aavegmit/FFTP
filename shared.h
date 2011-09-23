@@ -18,6 +18,7 @@
 #include <pthread.h>
 #include <list>
 #include <sys/wait.h>
+#include "bitvector.h"
 
 using namespace std ;
 
@@ -58,4 +59,5 @@ extern pthread_cond_t udpMessageQCV;
 extern int udpPortList[5];
 extern unsigned char clientName[255];
 
+extern uint64_t seq_num_count;
 #endif
