@@ -11,6 +11,7 @@ pthread_cond_t udpMessageQCV;
 
 int udpPortList[5] = {42000, 42001, 42002, 42003, 42004};
 unsigned char clientName[] = CLIENT_NAME;
+bool shutDownFlag = false;
 
 void init(){
 
@@ -135,7 +136,7 @@ void pushMessageInUDPq(uint64_t sequenceNum, uint32_t size, unsigned char *buffe
     udpMessage mes ;
     mes.sequenceNum = sequenceNum;
     mes.data_len = size;
-    mes.buffer = (unsigned char *)malloc(size) ;
+    //mes.buffer = (unsigned char *)malloc(size) ;
     memcpy(mes.buffer, buffer, size) ;
     // Acquire the tcp write thread lock
     pthread_mutex_lock(&udpMessageQLock) ;
@@ -154,7 +155,7 @@ udpMessage getUDPpacketFromData(uint64_t sequenceNum, uint32_t size, unsigned ch
 
 	mes.sequenceNum = sequenceNum;
 	mes.data_len = size;
-        mes.buffer = (unsigned char *)malloc(size) ;
+    //mes.buffer = (unsigned char *)malloc(size) ;
 	memcpy(mes.buffer, buffer, size) ;
 
 return mes;

@@ -1,9 +1,5 @@
-[M] Implement Cache - write method
-[A] Implement processAck
-[R] Implement handleFileInfo
-[R] Implement processMetaData
-[M] UDP destination for server needs to be dynamic
 Have the shutdown flags setup
-Write to file thread
+get name of client to whom server needs to send data packet
+get filename to be transfered for UDP server
 [*] Find a compression algo
 [*] Implement compression algo

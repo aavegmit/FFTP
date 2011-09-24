@@ -32,7 +32,7 @@ typedef struct tcpMessageT {
 } tcpMessage ;
 
 typedef struct udpMessageT {
-	unsigned char *buffer;
+	unsigned char buffer[MAXDATASIZE];
 	uint64_t sequenceNum;
 	uint32_t data_len;
 } udpMessage ;
@@ -61,4 +61,6 @@ extern int udpPortList[5];
 extern unsigned char clientName[255];
 
 extern uint64_t seq_num_count;
+
+extern bool shutDownFlag ;
 #endif

@@ -36,7 +36,9 @@ using namespace std ;
 extern unsigned char *fileMap;
 extern struct stat fileStat;
 extern pthread_mutex_t sequenceNumberListLock;
+extern pthread_cond_t sequenceNumberListCV;
 extern list<uint64_t > sequenceNumberList;
+extern unsigned char *mapToFile;
 // Constructor like function to open file via normal fopen or MMAP open
 // Fast Read of a block using MMAP
 // Fast write of a block using MMAP
@@ -55,3 +57,11 @@ void populateSequenceNumberList();
 //get blocks of data from file
 void getDataFromFile(uint64_t , unsigned char[], uint32_t *);
 
+//function writes to file at client side
+void *WriteToFileThread(void *);
+
+//loads MMap to write into file at client side
+int loadMMapForFile(unsigned char[]);
+
+//unloads MMap to write into file at client side
+void unloadMMapForFile(int);

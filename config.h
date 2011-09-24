@@ -16,10 +16,12 @@
 #define MAXDATASIZE 1024
 #define TCP_BACKLOG 10
 #define TCP_HEADER_SIZE 5
-#define NUM_UDP_CONNECTION 1
+#define NUM_UDP_CONNECTION 3
 #define CLIENT_NAME "localhost"
 #define FILE_NAME "/media/My DATA/PICS/WALLPAPERS/google_search.jpg"
+//#define FILE_NAME "TODO"
 #define RANDOM_PACKET 0
 #define LOST_PACKET 1
 #define MAX_CACHE_SIZE 10
 #define ACK_SENDING_RATIO 5
+#define FILE_SIZE 28196

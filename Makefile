@@ -4,8 +4,8 @@ all: ${TARGETS}
 server: server.o server_tcp.o server_udp.o fileIO.o shared.o bitvector.o cache.o
 	g++ -o server server.o server_tcp.o server_udp.o shared.o fileIO.o bitvector.o cache.o -Wall -D_REETRANT -lpthread
 
-client: client.o client_tcp.o client_udp.o shared.o bitvector.o
-	g++ -o client client.o client_tcp.o client_udp.o shared.o bitvector.o -Wall -D_REETRANT -lpthread
+client: client.o client_tcp.o client_udp.o shared.o bitvector.o fileIO.o
+	g++ -o client client.o client_tcp.o client_udp.o shared.o bitvector.o fileIO.o -Wall -D_REETRANT -lpthread
 
 server.o: server.cc
 	g++ -c -g server.cc -Wall -D_REETRANT -lpthread

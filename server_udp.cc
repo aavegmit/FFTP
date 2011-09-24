@@ -16,40 +16,40 @@ void *UDPserverThread(void *){
 
     for(int i = 0 ; i < NUM_UDP_CONNECTION; i++){
 
-	sockfd[i] = socket(AF_INET, SOCK_DGRAM, 0);
-	if (sockfd[i] < 0) {
-	    //error("ERROR opening UDP socket"); 
-	    printf("Error opening UDP socket\n");
-	    exit(0);
-	}
+        sockfd[i] = socket(AF_INET, SOCK_DGRAM, 0);
+        if (sockfd[i] < 0) {
+            //error("ERROR opening UDP socket"); 
+            printf("Error opening UDP socket\n");
+            exit(0);
+        }
     }
 
     server = gethostbyname((char *)clientName);
 
     if (server == NULL) {
-	fprintf(stderr,"ERROR, no such host\n");
-	exit(0);
+        fprintf(stderr,"ERROR, no such host\n");
+        exit(0);
     }
 
     for(int i = 0;i < NUM_UDP_CONNECTION; i++){
-	bzero((char *) &serv_addr[i], sizeof(serv_addr[i]));
-	serv_addr[i].sin_family = AF_INET;
-	bcopy((char *)server->h_addr,(char *)&serv_addr[i].sin_addr.s_addr,server->h_length);
-	serv_addr[i].sin_port = htons(udpPortList[i]);
+        bzero((char *) &serv_addr[i], sizeof(serv_addr[i]));
+        serv_addr[i].sin_family = AF_INET;
+        bcopy((char *)server->h_addr,(char *)&serv_addr[i].sin_addr.s_addr,server->h_length);
+        serv_addr[i].sin_port = htons(udpPortList[i]);
 
-	//populate UDP server data so to pass to read and write thread
-	udpSocketDataObj = (struct udpSocketData *)malloc(sizeof(struct udpSocketData));
-	udpSocketDataObj->serv_addr = serv_addr[i];
-	udpSocketDataObj->sockfd = sockfd[i];
+        //populate UDP server data so to pass to read and write thread
+        udpSocketDataObj = (struct udpSocketData *)malloc(sizeof(struct udpSocketData));
+        udpSocketDataObj->serv_addr = serv_addr[i];
+        udpSocketDataObj->sockfd = sockfd[i];
 
-	pthread_create(&udpMessageQ[i], NULL, UDPwriteThread, (void *)udpSocketDataObj);
-	pthread_create(&udpReadThread[i], NULL, UDPreadThread, (void *)udpSocketDataObj);
-	memset(&udpSocketDataObj, 0, sizeof(udpSocketDataObj));
+        pthread_create(&udpMessageQ[i], NULL, UDPwriteThread, (void *)udpSocketDataObj);
+        pthread_create(&udpReadThread[i], NULL, UDPreadThread, (void *)udpSocketDataObj);
+        memset(&udpSocketDataObj, 0, sizeof(udpSocketDataObj));
     }
 
     for(int i = 0;i < NUM_UDP_CONNECTION;i++){
-	pthread_join(udpMessageQ[i], NULL);
-	pthread_join(udpReadThread[i], NULL);
+        pthread_join(udpMessageQ[i], NULL);
+        pthread_join(udpReadThread[i], NULL);
     }
     return 0;
 }
@@ -70,24 +70,24 @@ void *UDPwriteThread(void *temp){
     int n;
 
     while(1){
-	while(udpMessageQ.empty()){
-	    printf("Nothing in message Queue, going on wait\n");
-	    pthread_mutex_lock(&udpMessageQLock);
-	    pthread_cond_wait(&udpMessageQCV, &udpMessageQLock);
-	    pthread_mutex_unlock(&udpMessageQLock);
-	}
+        while(udpMessageQ.empty()){
+            printf("Nothing in message Queue, going on wait\n");
+            pthread_mutex_lock(&udpMessageQLock);
+            pthread_cond_wait(&udpMessageQCV, &udpMessageQLock);
+            pthread_mutex_unlock(&udpMessageQLock);
+        }
 
-	pthread_mutex_lock(&udpMessageQLock);
-	mes = udpMessageQ.front();
-	udpMessageQ.pop_front();
-	pthread_mutex_unlock(&udpMessageQLock);
+        pthread_mutex_lock(&udpMessageQLock);
+        mes = udpMessageQ.front();
+        udpMessageQ.pop_front();
+        pthread_mutex_unlock(&udpMessageQLock);
 
-	printf("Sending UDP Packets to client....%d\n", udpSocketDataObj->sockfd);
-	n = sendto(udpSocketDataObj->sockfd, &mes, sizeof(mes), 0,(struct sockaddr *) &udpSocketDataObj->serv_addr,sizeof(udpSocketDataObj->serv_addr));
-	if (n < 0) {
-	    printf("ERROR writing to UDP socket\n");
-	    exit(0);
-	}
+        printf("Sending UDP Packets to client....%d\n", udpSocketDataObj->sockfd);
+        n = sendto(udpSocketDataObj->sockfd, &mes, sizeof(mes), 0,(struct sockaddr *) &udpSocketDataObj->serv_addr,sizeof(udpSocketDataObj->serv_addr));
+        if (n < 0) {
+            printf("ERROR writing to UDP socket\n");
+            exit(0);
+        }
     }
     return 0;
 }
