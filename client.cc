@@ -1,7 +1,6 @@
 #include "client.h"
 #include "fileIO.h"
 
-param objParam;
 
 int parseCommandLine(char **argv){
     objParam.serverName = argv[1];
@@ -44,16 +43,16 @@ int main(int argc, char **argv){
 		exit(EXIT_FAILURE) ;
 	}
 	
-    pthread_t writeToFileThread;
-	res = pthread_create(&writeToFileThread, NULL, WriteToFileThread, &rv); 
-	if( res != 0){
-		fprintf(stderr, "UDP Connection thread creation failed\n") ;
-		exit(EXIT_FAILURE) ;
-	}
+//	pthread_t writeToFileThread;
+//	res = pthread_create(&writeToFileThread, NULL, WriteToFileThread, &rv); 
+//	if( res != 0){
+//	    fprintf(stderr, "UDP Connection thread creation failed\n") ;
+//	    exit(EXIT_FAILURE) ;
+//	}
 
 	// Wait for all the threads to stop
 //	pthread_join(tcpConnectionThread, NULL);
-	pthread_join(writeToFileThread, NULL);
+//	pthread_join(writeToFileThread, NULL);
 	pthread_join(udpConnectionThread, NULL);
 	printf("Client Exiting.....\n");
 }

@@ -24,4 +24,3 @@
 #define LOST_PACKET 1
 #define MAX_CACHE_SIZE 10
 #define ACK_SENDING_RATIO 5
-#define FILE_SIZE 28196

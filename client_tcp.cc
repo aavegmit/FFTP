@@ -115,12 +115,20 @@ void handleFileInfo(unsigned char *buffer, uint32_t data_len){
     printf("Initialising the bitvector..\n") ;
     bitV = (unsigned char *)malloc(objParam.noOfSeq/8+1) ;
     // Start UDP clients
-    pthread_t udpConnectionThread;
-    int res = pthread_create(&udpConnectionThread, NULL, UDPconnectionThread, &rv); 
+//    pthread_t udpConnectionThread;
+//    int res = pthread_create(&udpConnectionThread, NULL, UDPconnectionThread, &rv); 
+//    if( res != 0){
+//	    fprintf(stderr, "UDP Connection thread creation failed\n") ;
+//	    exit(EXIT_FAILURE) ;
+//    }
+
+    pthread_t writeToFileThread;
+    int res = pthread_create(&writeToFileThread, NULL, WriteToFileThread, &rv); 
     if( res != 0){
-	    fprintf(stderr, "UDP Connection thread creation failed\n") ;
-	    exit(EXIT_FAILURE) ;
+	fprintf(stderr, "UDP Connection thread creation failed\n") ;
+	exit(EXIT_FAILURE) ;
     }
+
 
 }
 

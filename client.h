@@ -20,16 +20,6 @@ struct udpSocketData{
 };
 
 
-typedef struct paramT{
-    string serverName;
-    string localFilePath;
-    string serverFilePath;
-    uint64_t fileSize;
-    uint64_t noOfSeq;
-}param;
-
-extern param objParam;
-
 //Threads 
 void *TCPconnectionThread(void *);
 void *UDPconnectionThread(void *);

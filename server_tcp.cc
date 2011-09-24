@@ -1,5 +1,4 @@
 #include "server.h"
-struct fileInfo fileInfoObj;
 
 // get sockaddr IPV4 or IPV6:
 void *get_in_addr(struct sockaddr *sa)

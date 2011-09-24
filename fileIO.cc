@@ -8,6 +8,8 @@ list<uint64_t > sequenceNumberList;
 pthread_mutex_t sequenceNumberListLock;
 pthread_cond_t sequenceNumberListCV;
 unsigned char *mapToFile;
+struct fileInfo fileInfoObj;
+param objParam;
 //function to load file into global variable for MMAP...'fileMap'
 void loadFileToMMap(){
 
@@ -101,7 +103,7 @@ void getDataFromFile(uint64_t sequenceNum, unsigned char blockData[], uint32_t *
 void *WriteToFileThread(void *args){
 
     udpMessage mes;
-    int fd = loadMMapForFile((unsigned char *)"temp.jpg");
+    int fd = loadMMapForFile((unsigned char *)objParam.localFilePath.c_str());
     //FILE *f = fopen("temp.jpg", "wb");
     //mes.buffer = (unsigned char *)malloc(MAXDATASIZE);
     memset(mes.buffer, '\0', MAXDATASIZE);
@@ -159,7 +161,7 @@ int loadMMapForFile(unsigned char fileName[]){
 
     /* Stretch the file size to the size of the (mmapped) array of ints
      */
-    result = lseek(fd, FILE_SIZE-1, SEEK_SET);
+    result = lseek(fd, objParam.fileSize -1, SEEK_SET);
     if (result == -1) {
         close(fd);
         perror("Error calling lseek() to 'stretch' the file");
@@ -185,7 +187,7 @@ int loadMMapForFile(unsigned char fileName[]){
 
     /* Now the file is ready to be mmapped.
      */
-    mapToFile = (unsigned char *)mmap(0, FILE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    mapToFile = (unsigned char *)mmap(0, objParam.fileSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (mapToFile == MAP_FAILED) {
         close(fd);
         perror("Error mmapping the file");
@@ -200,7 +202,7 @@ void unloadMMapForFile(int fd) {
 
     /* Don't forget to free the mmapped memory
      */
-    if (munmap(mapToFile, FILE_SIZE) == -1) {
+    if (munmap(mapToFile, objParam.fileSize) == -1) {
         perror("Error un-mmapping the file");
         /* Decide here whether to close(fd) and exit() or not. Depends... */
     }
