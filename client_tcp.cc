@@ -103,19 +103,30 @@ void processReceivedTCPmessage(uint8_t message_type, unsigned char *buffer, uint
 
 void handleFileInfo(unsigned char *buffer, uint32_t data_len){
     buffer[data_len] = '\0';
-    objParam.fileSize = atoi((char *)buffer);
+    int rv=0;
+    objParam.fileSize = atol((char *)buffer);
     if(objParam.fileSize % MAXDATASIZE == 0 )
 	objParam.noOfSeq = objParam.fileSize/MAXDATASIZE;
-    else
+
 	objParam.noOfSeq = (objParam.fileSize/MAXDATASIZE) + 1;
   
     cout << "no of packets to receive from the server " << objParam.noOfSeq << endl;
-	// Allocate memory to bitV
-	// Start UDP clients
+    // Allocate memory to bitV
+    printf("Initialising the bitvector..\n") ;
+    bitV = (unsigned char *)malloc(objParam.noOfSeq/8+1) ;
+    // Start UDP clients
+    pthread_t udpConnectionThread;
+    int res = pthread_create(&udpConnectionThread, NULL, UDPconnectionThread, &rv); 
+    if( res != 0){
+	    fprintf(stderr, "UDP Connection thread creation failed\n") ;
+	    exit(EXIT_FAILURE) ;
+    }
+
 }
 
 void handleFileNotFound(unsigned char *buffer, uint32_t data_len){
     cout << "File not found at the server\n";
+    // Call the sshutdown method here
 }
 
 void handleAckRequest(unsigned char *buffer, uint32_t data_len){

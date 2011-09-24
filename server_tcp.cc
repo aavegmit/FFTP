@@ -144,7 +144,7 @@ void processReceivedTCPmessage(uint8_t message_type, unsigned char *buffer, uint
 // Receives file name 
 // initialize the thread - prepareBlockThread
 void handleFileName(unsigned char *buffer, uint32_t data_len){
-    fileInfoObj.fileName = (char *) buffer;
+    fileInfoObj.fileName = string((char *)buffer, data_len) ;
     FILE *fp;
     int rv = 0 ;
     fp = fopen(fileInfoObj.fileName.c_str(),"r"); 
