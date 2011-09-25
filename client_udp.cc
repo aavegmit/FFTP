@@ -69,7 +69,6 @@ void *UDPreadThread(void *temp){
         }
         printf("Packet %d received by %d\n",mes.sequenceNum, udpSocketDataObj->sockfd);
 
-
         pthread_mutex_lock(&udpMessageQLock) ;
         // push the unsigned char in Q
         udpMessageQ.push_back(mes) ;

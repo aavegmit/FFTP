@@ -48,6 +48,7 @@ void *prepareBlockThread(void *args){
             printf("Found packet in cache...\n");
             pthread_mutex_lock(&udpPacketCacheLock);
             mes = udpPacketCache[sequenceNum];
+            memcpy(fileData, mes.buffer, mes.data_len);
             pthread_mutex_unlock(&udpPacketCacheLock);
         }
         else{

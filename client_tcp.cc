@@ -105,9 +105,9 @@ void handleFileInfo(unsigned char *buffer, uint32_t data_len){
     int rv=0;
     objParam.fileSize = atol((char *)buffer);
     if(objParam.fileSize % MAXDATASIZE == 0 )
-	objParam.noOfSeq = objParam.fileSize/MAXDATASIZE;
+	    objParam.noOfSeq = objParam.fileSize/MAXDATASIZE;
     else
-	objParam.noOfSeq = (objParam.fileSize/MAXDATASIZE) + 1;
+    	objParam.noOfSeq = (objParam.fileSize/MAXDATASIZE) + 1;
   
     cout << "no of packets to receive from the server " << objParam.noOfSeq << endl;
     // Allocate memory to bitV

@@ -4,15 +4,15 @@
 void *get_in_addr(struct sockaddr *sa)
 {
     if (sa->sa_family == AF_INET) {
-	return &(((struct sockaddr_in*)sa)->sin_addr);
+        return &(((struct sockaddr_in*)sa)->sin_addr);
     }
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
 int listenServer(int &sockfd){
     if (listen(sockfd, TCP_BACKLOG) == -1) {
-	perror("listen");
-	return -1;
+        perror("listen");
+        return -1;
     }
     return 1;
 }
@@ -28,36 +28,36 @@ int bindServerInfo(int &sockfd){
     hints.ai_flags = AI_PASSIVE; // use my IP
 
     if ((rv = getaddrinfo(NULL, TCP_PORT, &hints, &servinfo)) != 0) {
-	fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-	return -1;
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+        return -1;
     }
 
     // loop through all the results and bind to the first we can
     for(p = servinfo; p != NULL; p = p->ai_next) {
-	if ((sockfd = socket(p->ai_family, p->ai_socktype,
-			p->ai_protocol)) == -1) {
-	    perror("server: socket");
-	    continue;
-	}
+        if ((sockfd = socket(p->ai_family, p->ai_socktype,
+                        p->ai_protocol)) == -1) {
+            perror("server: socket");
+            continue;
+        }
 
-	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
-		    sizeof(int)) == -1) {
-	    perror("setsockopt");
-	    return -1; 
-	}
+        if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
+                    sizeof(int)) == -1) {
+            perror("setsockopt");
+            return -1; 
+        }
 
-	if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
-	    close(sockfd);
-	    perror("server: bind");
-	    continue;
-	}
+        if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+            close(sockfd);
+            perror("server: bind");
+            continue;
+        }
 
-	break;
+        break;
     }
 
     if (p == NULL)  {
-	fprintf(stderr, "server: failed to bind\n");
-	return -1;
+        fprintf(stderr, "server: failed to bind\n");
+        return -1;
     }
 
     freeaddrinfo(servinfo); // all done with this structure
@@ -69,8 +69,8 @@ int acceptRequest(struct sockaddr_storage &their_addr, int &sockfd, int &new_fd)
     socklen_t sin_size = sizeof their_addr;
     new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
     if (new_fd == -1) {
-	perror("accept");
-	return -1;
+        perror("accept");
+        return -1;
     }
     return 1;
 }
@@ -82,46 +82,45 @@ void *TCPserverThread(void *arg){
 
 
     if( bindServerInfo(sockfd) < 0 )
-	pthread_exit(0);
+        pthread_exit(0);
 
     if( listenServer(sockfd) < 0 )
-	pthread_exit(0);	
+        pthread_exit(0);	
 
     printf("server: waiting for connections...\n");
 
     pthread_t tcpReadThread;
     pthread_t tcpWriteThread;
     while(1) {  // main accept() loop
-	new_fd = 0;	
-	if( acceptRequest(their_addr, sockfd, new_fd) < 0 )
-	    continue;
+        new_fd = 0;	
+        if( acceptRequest(their_addr, sockfd, new_fd) < 0 )
+            continue;
 
-	inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), s, sizeof s);
-	printf("server: got connection from %s\n", s);
-	memcpy(clientName, s, sizeof(s));
+        inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), s, sizeof s);
+        printf("server: got connection from %s\n", s);
+        memcpy(clientName, s, sizeof(s));
 
-	if (new_fd < 0){
-	    break ;
-	    //	    close(new_fd) ;
-	}
-	else
-	{ 
-	    //	    close(sockfd); // child doesn't need the listener
-	    // Initiate the TCP read thread
-	    int res = pthread_create(&tcpReadThread, NULL, TCPreadThread, (void *)new_fd); 
-	    if( res != 0){
-		fprintf(stderr, "TCP read thread creation failed\n") ;
-		exit(EXIT_FAILURE) ;
-	    }
+        if (new_fd < 0){
+            break ;
+            //	    close(new_fd) ;
+        }
+        else
+        { 
+            //	    close(sockfd); // child doesn't need the listener
+            // Initiate the TCP read thread
+            int res = pthread_create(&tcpReadThread, NULL, TCPreadThread, (void *)new_fd); 
+            if( res != 0){
+                fprintf(stderr, "TCP read thread creation failed\n") ;
+                exit(EXIT_FAILURE) ;
+            }
 
-	    // Initiate the TCP write thread
-	    res = pthread_create(&tcpWriteThread, NULL, TCPwriteThread, (void *)new_fd); 
-	    if( res != 0){
-		fprintf(stderr, "TCP write thread creation failed\n") ;
-		exit(EXIT_FAILURE) ;
-	    }
-
-	}
+            // Initiate the TCP write thread
+            res = pthread_create(&tcpWriteThread, NULL, TCPwriteThread, (void *)new_fd); 
+            if( res != 0){
+                fprintf(stderr, "TCP write thread creation failed\n") ;
+                exit(EXIT_FAILURE) ;
+            }
+        }
     }
     pthread_join(tcpReadThread, NULL) ;
     pthread_join(tcpWriteThread, NULL) ;
@@ -130,13 +129,13 @@ void *TCPserverThread(void *arg){
 
 void processReceivedTCPmessage(uint8_t message_type, unsigned char *buffer, uint32_t data_len){
     if(message_type == 0x1a){
-	handleFileName(buffer, data_len) ;
+        handleFileName(buffer, data_len) ;
     }
     else if(message_type == 0x2b){
-	handleACKlist(buffer, data_len) ;
+        handleACKlist(buffer, data_len) ;
     }
     else{
-	fprintf(stderr, "TCP message not recognized\n") ;
+        fprintf(stderr, "TCP message not recognized\n") ;
     }
 }
 
@@ -149,12 +148,12 @@ void handleFileName(unsigned char *buffer, uint32_t data_len){
     fp = fopen(fileInfoObj.fileName.c_str(),"r"); 
     if(fp==NULL)
     {
-	cout << fileInfoObj.fileName << "The file doesn't exist " << endl;
-	pushMessageInTCPq(0x1c, NULL, 0);
-	return;
+        cout << fileInfoObj.fileName << "The file doesn't exist " << endl;
+        pushMessageInTCPq(0x1c, NULL, 0);
+        return;
     }
     if( stat(fileInfoObj.fileName.c_str(), &fileInfoObj.fileStat) < 0)
-	return;	 
+        return;	 
     fclose(fp); 
     std::stringstream ss;
     ss << fileInfoObj.fileStat.st_size << "\0";
@@ -164,13 +163,12 @@ void handleFileName(unsigned char *buffer, uint32_t data_len){
     //	Thread writes the data to UDP write thread's list
     pthread_t PrepareBlockThread;
     pthread_create(&PrepareBlockThread, NULL, prepareBlockThread, &rv);
-
     //Thread - Start UDP Server
-    pthread_t udpServerThread;	
+    pthread_t udpServerThread;
     int res = pthread_create(&udpServerThread, NULL, UDPserverThread, &rv);
     if( res != 0){
-	fprintf(stderr, "TCP write thread creation failed\n") ;
-	exit(EXIT_FAILURE) ;
+        fprintf(stderr, "TCP read thread creation failed\n") ;
+        exit(EXIT_FAILURE) ;
     }
 }
 
@@ -185,18 +183,18 @@ void handleACKlist(unsigned char *buffer, uint32_t data_len){
     memcpy(&last_seq_num, buffer + 8, 8) ;
     printf("Server receives a ACK list from the client...%d - %d\n", seq_num, last_seq_num) ;
     for(uint64_t i = (seq_num%8) ; i < last_seq_num - (seq_num / 8)*8 ; ++i){
-	current_seq_num = (seq_num/8)*8 + i ;
-	if(readBit(buffer+16, i) == 0x01){
-	    printf("Packet received - %ld\n", current_seq_num) ;
-	    removeFromUDPPacketCache(current_seq_num) ;
-	}
-	else{
-	    pthread_mutex_lock(&sequenceNumberListLock);
-	    sequenceNumberList.push_front(current_seq_num);
-	    pthread_mutex_unlock(&sequenceNumberListLock);
-	    writeToCache(current_seq_num, getUDPpacketFromSeqNum(current_seq_num), LOST_PACKET ) ;
-	    printf("Packet lost - %d\n", current_seq_num) ;
-	}
+        current_seq_num = (seq_num/8)*8 + i ;
+        if(readBit(buffer+16, i) == 0x01){
+            printf("Packet received - %ld\n", current_seq_num) ;
+            removeFromUDPPacketCache(current_seq_num) ;
+        }
+        else{
+            pthread_mutex_lock(&sequenceNumberListLock);
+            sequenceNumberList.push_front(current_seq_num);
+            pthread_mutex_unlock(&sequenceNumberListLock);
+            writeToCache(current_seq_num, getUDPpacketFromSeqNum(current_seq_num), LOST_PACKET ) ;
+            printf("Packet lost - %d\n", current_seq_num) ;
+        }
     }
 }
 

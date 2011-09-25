@@ -1,7 +1,4 @@
 Have the shutdown flags setup
-get name of client to whom server needs to send data packet
-get filename to be transfered for UDP server
-[M] UDP destination for server needs to be dynamic
 [A] Integration
 [R] Find a compression algo
 [R] Implement compression algo

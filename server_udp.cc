@@ -70,8 +70,9 @@ void *UDPwriteThread(void *temp){
     int n;
 
     while(1){
-	pthread_mutex_lock(&udpMessageQLock);
+        pthread_mutex_lock(&udpMessageQLock);
         while(udpMessageQ.empty()){
+            printf("Nothing in message Queue, going on wait\n");
             pthread_cond_wait(&udpMessageQCV, &udpMessageQLock);
         }
 
