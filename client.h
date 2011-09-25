@@ -17,6 +17,7 @@ struct udpSocketData{
 
         struct sockaddr_in serv_addr;
         int sockfd;
+        int myId;
 };
 
 

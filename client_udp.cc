@@ -31,6 +31,7 @@ void *UDPconnectionThread(void *){
 
         udpSocketDataObj = (struct udpSocketData *)malloc(sizeof(struct udpSocketData));
         udpSocketDataObj->sockfd = sockfd[i];
+        udpSocketDataObj->myId = i;
         //printf("SOCKET IS: %d\n", udpSocketDataObj->sockfd);
         udpSocketDataObj->serv_addr = serv_addr[i];
         pthread_create(&udpWriteThread[i], NULL, UDPwriteThread, (void *)udpSocketDataObj);
@@ -72,13 +73,13 @@ void *UDPreadThread(void *temp){
         }
 //        printf("Packet %d received by %d\n",mes.sequenceNum, udpSocketDataObj->sockfd);
 
-        pthread_mutex_lock(&udpMessageQLock) ;
+        pthread_mutex_lock(&udpMessageClientQLock) ;
         // push the unsigned char in Q
-        udpMessageQ.push_back(mes) ;
+        udpMessageClientQ.push_back(mes) ;
         // Signal the write thread to wake up
-        pthread_cond_signal(&udpMessageQCV) ;
+        pthread_cond_signal(&udpMessageClientQCV) ;
         // release the lock
-        pthread_mutex_unlock(&udpMessageQLock) ;
+        pthread_mutex_unlock(&udpMessageClientQLock) ;
 	// Set the bit vector
 	writeBit(bitV, mes.sequenceNum, 0x01) ;
 //	printf("%d %d\n", count1, count2) ;

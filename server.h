@@ -20,6 +20,7 @@ struct udpSocketData{
 
 	struct sockaddr_in serv_addr;
 	int sockfd;
+    int myId;
 };
 
 // List maintaining all the sequence numbers to be sent

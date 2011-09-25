@@ -17,28 +17,31 @@ int main(int argc, char **argv){
 // Fetches the unsent/lost blocks from the cache/file
 // and puts them in the server UDP write queue
 void *prepareBlockThread(void *args){
+
+    int myId = *((int *)args);
+    //int myId = temp;
     uint64_t sequenceNum;
     uint32_t size = 0;
     unsigned char *fileData = (unsigned char *)malloc(MAXDATASIZE+1);
     udpMessage mes;
     memset(fileData, '\0',MAXDATASIZE+1);
 
-    loadFileToMMap();
-    populateSequenceNumberList();
+    //loadFileToMMap();
+    //populateSequenceNumberList();
     while(1){
 
         pthread_mutex_lock(&sequenceNumberListLock);
-        if(sequenceNumberList.size() == 0){
+        while(sequenceNumberList.size() == 0){
             
             pthread_cond_wait(&sequenceNumberListCV, &sequenceNumberListLock);
-            pthread_mutex_unlock(&sequenceNumberListLock);
+            //pthread_mutex_unlock(&sequenceNumberListLock);
 
         }
-        else
-            pthread_mutex_unlock(&sequenceNumberListLock);
+        //else
+          //  pthread_mutex_unlock(&sequenceNumberListLock);
 
         //reading from the start of sequence number list
-        pthread_mutex_lock(&sequenceNumberListLock);
+        //pthread_mutex_lock(&sequenceNumberListLock);
         sequenceNum = sequenceNumberList.front();
         sequenceNumberList.pop_front();
         pthread_mutex_unlock(&sequenceNumberListLock);
@@ -64,12 +67,13 @@ void *prepareBlockThread(void *args){
             writeToCache(sequenceNum, mes, RANDOM_PACKET);	
         }
 
-        pushMessageInUDPq(sequenceNum, size, fileData);
+        pushMessageInUDPq(sequenceNum, size, fileData, myId);
 
         memset(fileData, '\0',MAXDATASIZE+1);
     }
 
-    unloadFileMap();
+    //NEED TO UNLOAD MAP SOMEWHERE
+    //unloadFileMap();
     return 0;
 }
 

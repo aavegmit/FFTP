@@ -5,9 +5,13 @@ pthread_mutex_t tcpMessageQLock;
 pthread_cond_t tcpMessageQCV;
 
 //message Queue for UDP server write thread
-list<udpMessage > udpMessageQ;
-pthread_mutex_t udpMessageQLock;
-pthread_cond_t udpMessageQCV;
+list<udpMessage > udpMessageQ[NUM_UDP_CONNECTION];
+pthread_mutex_t udpMessageQLock[NUM_UDP_CONNECTION];
+pthread_cond_t udpMessageQCV[NUM_UDP_CONNECTION];
+
+list<udpMessage > udpMessageClientQ;
+pthread_mutex_t udpMessageClientQLock;
+pthread_cond_t udpMessageClientQCV;
 
 int udpPortList[20] = {42000, 42001, 42002, 42003, 42004, 42005, 42006, 42007, 42008, 42009, 42010, 42011, 42012, 42013, 42014, 42015, 42016, 42017, 42018, 42019};
 unsigned char clientName[] = CLIENT_NAME;
@@ -28,14 +32,16 @@ void init(){
 
 void initUDP(){
 
-    int res = pthread_mutex_init(&udpMessageQLock, NULL);
+    for(int i =0;i<NUM_UDP_CONNECTION;i++){
+    int res = pthread_mutex_init(&udpMessageQLock[i], NULL);
     if (res != 0){
 	fprintf(stderr, "Lock init failed\n") ;
     }
 
-    res = pthread_cond_init(&udpMessageQCV, NULL);
+    res = pthread_cond_init(&udpMessageQCV[i], NULL);
     if (res != 0){
 	fprintf(stderr, "CV init failed\n") ;
+    }
     }
 
 }
@@ -131,7 +137,7 @@ void pushMessageInTCPq(uint8_t message_type, unsigned char * buffer, uint32_t da
     pthread_mutex_unlock(&tcpMessageQLock) ;
 }
 
-void pushMessageInUDPq(uint64_t sequenceNum, uint32_t size, unsigned char *buffer){
+void pushMessageInUDPq(uint64_t sequenceNum, uint32_t size, unsigned char *buffer, int myId){
     // Construct the unsigned char
     udpMessage mes ;
     mes.sequenceNum = sequenceNum;
@@ -139,13 +145,14 @@ void pushMessageInUDPq(uint64_t sequenceNum, uint32_t size, unsigned char *buffe
     //mes.buffer = (unsigned char *)malloc(size) ;
     memcpy(mes.buffer, buffer, size) ;
     // Acquire the tcp write thread lock
-    pthread_mutex_lock(&udpMessageQLock) ;
+    pthread_mutex_lock(&udpMessageQLock[myId]) ;
     // push the unsigned char in Q
-    udpMessageQ.push_back(mes) ;
+    udpMessageQ[myId].push_back(mes) ;
     // Signal the write thread to wake up
-    pthread_cond_broadcast(&udpMessageQCV) ;
+    //pthread_cond_broadcast(&udpMessageQCV) ;
+    pthread_cond_signal(&udpMessageQCV[myId]) ;
     // release the lock
-    pthread_mutex_unlock(&udpMessageQLock) ;
+    pthread_mutex_unlock(&udpMessageQLock[myId]) ;
 }
 
 

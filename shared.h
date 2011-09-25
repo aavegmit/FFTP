@@ -41,7 +41,7 @@ void processReceivedTCPmessage(uint8_t, unsigned char *, uint32_t) ;
 void init() ;
 void initUDP() ;
 
-void pushMessageInUDPq(uint64_t, uint32_t, unsigned char* );
+void pushMessageInUDPq(uint64_t, uint32_t, unsigned char* , int);
 void pushMessageInTCPq(uint8_t, unsigned char *, uint32_t) ;
 //creates a udp packet for caching purposes
 udpMessage getUDPpacketFromData(uint64_t, uint32_t, unsigned char*);
@@ -53,9 +53,13 @@ extern pthread_cond_t tcpMessageQCV;
 extern unsigned char *bitV ;
 //lock and CV for UDP write thread
 //message Queue for UDP server write thread
-extern list<udpMessage > udpMessageQ;
-extern pthread_mutex_t udpMessageQLock;
-extern pthread_cond_t udpMessageQCV;
+extern list<udpMessage > udpMessageQ[NUM_UDP_CONNECTION];
+extern pthread_mutex_t udpMessageQLock[NUM_UDP_CONNECTION];
+extern pthread_cond_t udpMessageQCV[NUM_UDP_CONNECTION];
+
+extern list<udpMessage > udpMessageClientQ;
+extern pthread_mutex_t udpMessageClientQLock;
+extern pthread_cond_t udpMessageClientQCV;
 
 extern int udpPortList[20];
 extern unsigned char clientName[255];

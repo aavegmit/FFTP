@@ -161,8 +161,16 @@ void handleFileName(unsigned char *buffer, uint32_t data_len){
     pushMessageInTCPq(0x1b,(unsigned char *) pktSize.c_str(), pktSize.size());
 
     //	Thread writes the data to UDP write thread's list
-    pthread_t PrepareBlockThread;
-    pthread_create(&PrepareBlockThread, NULL, prepareBlockThread, &rv);
+    loadFileToMMap();
+    populateSequenceNumberList();
+    int temp[NUM_UDP_CONNECTION];
+    for(int i = 0;i<NUM_UDP_CONNECTION;i++){
+
+        pthread_t PrepareBlockThread;
+        temp[i] = i;
+        printf("PrepareBlockThread is creating: %d\n", temp[i]);
+        pthread_create(&PrepareBlockThread, NULL, prepareBlockThread, &temp[i]);
+    }
     //Thread - Start UDP Server
     pthread_t udpServerThread;
     int res = pthread_create(&udpServerThread, NULL, UDPserverThread, &rv);

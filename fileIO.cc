@@ -114,15 +114,15 @@ void *WriteToFileThread(void *args){
     //mes.buffer = (unsigned char *)malloc(MAXDATASIZE);
     memset(mes.buffer, '\0', MAXDATASIZE);
     while(1){
-	pthread_mutex_lock(&udpMessageQLock);
-	if(udpMessageQ.empty()){
+	pthread_mutex_lock(&udpMessageClientQLock);
+	if(udpMessageClientQ.empty()){
             printf("Nothing in message Queue, going on wait at client side\n");
-            pthread_cond_wait(&udpMessageQCV, &udpMessageQLock);
+            pthread_cond_wait(&udpMessageClientQCV, &udpMessageClientQLock);
         }
 
-        mes = udpMessageQ.front();
-        udpMessageQ.pop_front();
-        pthread_mutex_unlock(&udpMessageQLock);
+        mes = udpMessageClientQ.front();
+        udpMessageClientQ.pop_front();
+        pthread_mutex_unlock(&udpMessageClientQLock);
 
 	++count1 ;
 //	printf("Writing in file %d\n", mes.sequenceNum) ;
@@ -133,7 +133,7 @@ void *WriteToFileThread(void *args){
 	// Check for the bitvector- termination
 	if(mes.sequenceNum == objParam.noOfSeq - 1)
 	    lastPacketReceived = true ;
-	if (lastPacketReceived && isBitVectorSet(bitV) && udpMessageQ.empty())
+	if (lastPacketReceived && isBitVectorSet(bitV) && udpMessageClientQ.empty())
 	    break ;
 
         memset(mes.buffer, '\0', MAXDATASIZE);

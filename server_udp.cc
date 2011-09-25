@@ -43,6 +43,7 @@ void *UDPserverThread(void *){
         udpSocketDataObj = (struct udpSocketData *)malloc(sizeof(struct udpSocketData));
         udpSocketDataObj->serv_addr = serv_addr[i];
         udpSocketDataObj->sockfd = sockfd[i];
+        udpSocketDataObj->myId = i;
 
         pthread_create(&udpMessageQ[i], NULL, UDPwriteThread, (void *)udpSocketDataObj);
         pthread_create(&udpReadThread[i], NULL, UDPreadThread, (void *)udpSocketDataObj);
@@ -68,26 +69,38 @@ void *UDPreadThread(void *udpSocketDataObj){
 void *UDPwriteThread(void *temp){
 
     struct udpSocketData *udpSocketDataObj = (struct udpSocketData *)temp;
+    int myId = udpSocketDataObj->myId;
     udpMessage mes;
     int n;
-
+    uint64_t counter = 0;
+    /*timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 1000;
+    fd_set fdwrite;
+    FD_ZERO(&fdwrite);
+    FD_SET(udpSocketDataObj->sockfd, &fdwrite);*/
     while(1){
-        pthread_mutex_lock(&udpMessageQLock);
-        while(udpMessageQ.empty()){
+        pthread_mutex_lock(&udpMessageQLock[myId]);
+        while(udpMessageQ[myId].empty()){
             printf("Nothing in message Queue, going on wait\n");
-            pthread_cond_wait(&udpMessageQCV, &udpMessageQLock);
+            pthread_cond_wait(&udpMessageQCV[myId], &udpMessageQLock[myId]);
         }
 
-        mes = udpMessageQ.front();
-        udpMessageQ.pop_front();
-        pthread_mutex_unlock(&udpMessageQLock);
+        mes = udpMessageQ[myId].front();
+        udpMessageQ[myId].pop_front();
+        pthread_mutex_unlock(&udpMessageQLock[myId]);
 
-        printf("Sending %d UDP Packets to client....%d\n",mes.sequenceNum, udpSocketDataObj->sockfd);
+        //usleep(10);
+        //int res = select((udpSocketDataObj->sockfd + (udpSocketDataObj->sockfd - NUM_UDP_CONNECTION) + 1) , NULL, &fdwrite, NULL,&tv);
+        //if(res){
+        counter++;
+        printf("Sending %d UDP Packets to client....%d is sending : %llu\n",mes.sequenceNum, udpSocketDataObj->sockfd, counter);
         n = sendto(udpSocketDataObj->sockfd, &mes, sizeof(mes), 0,(struct sockaddr *) &udpSocketDataObj->serv_addr,sizeof(udpSocketDataObj->serv_addr));
         if (n < 0) {
             printf("ERROR writing to UDP socket\n");
 //            exit(0);
         }
+        //}
     }
     return 0;
 }

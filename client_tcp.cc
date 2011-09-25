@@ -121,8 +121,6 @@ void handleFileInfo(unsigned char *buffer, uint32_t data_len){
 	fprintf(stderr, "UDP Connection thread creation failed\n") ;
 	exit(EXIT_FAILURE) ;
     }
-
-
 }
 
 void handleFileNotFound(unsigned char *buffer, uint32_t data_len){
