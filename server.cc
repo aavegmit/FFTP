@@ -10,15 +10,8 @@ int main(int argc, char **argv){
     pthread_t tcpServerThread;	
     pthread_create(&tcpServerThread, NULL, TCPserverThread, &rv);
 
-    //Thread - Start UDP Server
-    pthread_t udpServerThread;	
-    pthread_create(&udpServerThread, NULL, UDPserverThread, &rv);
-
     // Wait for the TCP server thread to close
     pthread_join(tcpServerThread, NULL);	
-    //pthread_join(udpServerThread, NULL);	
-
-
 }
 
 // Fetches the unsent/lost blocks from the cache/file
@@ -32,7 +25,6 @@ void *prepareBlockThread(void *args){
 
     loadFileToMMap();
     populateSequenceNumberList();
-    //printMMapToFile();
     while(1){
 
         pthread_mutex_lock(&sequenceNumberListLock);
@@ -71,15 +63,11 @@ void *prepareBlockThread(void *args){
             writeToCache(sequenceNum, mes, RANDOM_PACKET);	
         }
 
-        //sleep(1);
-        //putting the 'fileData' into the list
-        //printf("Packet sent to UDP Message Q....\n");
         pushMessageInUDPq(sequenceNum, size, fileData);
 
         memset(fileData, '\0',MAXDATASIZE+1);
     }
 
-    //	fclose(f);
     unloadFileMap();
     return 0;
 }

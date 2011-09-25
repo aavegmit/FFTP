@@ -16,7 +16,7 @@
 #define MAXDATASIZE 1024
 #define TCP_BACKLOG 10
 #define TCP_HEADER_SIZE 5
-#define NUM_UDP_CONNECTION 3
+#define NUM_UDP_CONNECTION 1
 #define CLIENT_NAME "localhost"
 #define FILE_NAME "/media/My DATA/PICS/WALLPAPERS/google_search.jpg"
 //#define FILE_NAME "TODO"

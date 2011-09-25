@@ -5,3 +5,4 @@ get filename to be transfered for UDP server
 [A] Integration
 [R] Find a compression algo
 [R] Implement compression algo
+Have ~ in the filenames convert to /home/username - if possible

@@ -17,10 +17,12 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdint.h>
+#include "fileIO.h"
 
 using namespace std ;
-
 
 unsigned char readBit(unsigned char *, uint64_t);
 void writeBit(unsigned char *, uint64_t, unsigned char);
 void getBitVector(unsigned char *, uint64_t, uint64_t, unsigned char *) ;
+bool isBitVectorSet(unsigned char *) ;
+void printBitVector(unsigned char *) ;

@@ -56,6 +56,8 @@ extern pthread_mutex_t sequenceNumberListLock;
 extern pthread_cond_t sequenceNumberListCV;
 extern list<uint64_t > sequenceNumberList;
 extern unsigned char *mapToFile;
+extern bool lastPacketReceived ;
+extern unsigned char *bitV ;
 void printMMapToFile();
 ///loads the file to mmap 'fileMap'
 void loadFileToMMap();

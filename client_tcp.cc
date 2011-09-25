@@ -1,6 +1,5 @@
 #include "client.h"
 
-unsigned char *bitV;
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -107,20 +106,14 @@ void handleFileInfo(unsigned char *buffer, uint32_t data_len){
     objParam.fileSize = atol((char *)buffer);
     if(objParam.fileSize % MAXDATASIZE == 0 )
 	objParam.noOfSeq = objParam.fileSize/MAXDATASIZE;
-
+    else
 	objParam.noOfSeq = (objParam.fileSize/MAXDATASIZE) + 1;
   
     cout << "no of packets to receive from the server " << objParam.noOfSeq << endl;
     // Allocate memory to bitV
     printf("Initialising the bitvector..\n") ;
     bitV = (unsigned char *)malloc(objParam.noOfSeq/8+1) ;
-    // Start UDP clients
-//    pthread_t udpConnectionThread;
-//    int res = pthread_create(&udpConnectionThread, NULL, UDPconnectionThread, &rv); 
-//    if( res != 0){
-//	    fprintf(stderr, "UDP Connection thread creation failed\n") ;
-//	    exit(EXIT_FAILURE) ;
-//    }
+    memset(bitV, 0x00, objParam.noOfSeq/8 + 1) ;
 
     pthread_t writeToFileThread;
     int res = pthread_create(&writeToFileThread, NULL, WriteToFileThread, &rv); 

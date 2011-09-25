@@ -58,7 +58,7 @@ void *UDPserverThread(void *){
 //Read thread for UDP server
 void *UDPreadThread(void *udpSocketDataObj){
 
-    printf("In the UDP read thread.....\n");
+//    printf("In the UDP read thread.....\n");
     return 0;
 }
 
@@ -70,19 +70,16 @@ void *UDPwriteThread(void *temp){
     int n;
 
     while(1){
+	pthread_mutex_lock(&udpMessageQLock);
         while(udpMessageQ.empty()){
-            printf("Nothing in message Queue, going on wait\n");
-            pthread_mutex_lock(&udpMessageQLock);
             pthread_cond_wait(&udpMessageQCV, &udpMessageQLock);
-            pthread_mutex_unlock(&udpMessageQLock);
         }
 
-        pthread_mutex_lock(&udpMessageQLock);
         mes = udpMessageQ.front();
         udpMessageQ.pop_front();
         pthread_mutex_unlock(&udpMessageQLock);
 
-        printf("Sending UDP Packets to client....%d\n", udpSocketDataObj->sockfd);
+        printf("Sending %d UDP Packets to client....%d\n",mes.sequenceNum, udpSocketDataObj->sockfd);
         n = sendto(udpSocketDataObj->sockfd, &mes, sizeof(mes), 0,(struct sockaddr *) &udpSocketDataObj->serv_addr,sizeof(udpSocketDataObj->serv_addr));
         if (n < 0) {
             printf("ERROR writing to UDP socket\n");

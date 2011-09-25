@@ -10,6 +10,11 @@ pthread_cond_t sequenceNumberListCV;
 unsigned char *mapToFile;
 struct fileInfo fileInfoObj;
 param objParam;
+bool lastPacketReceived ;
+unsigned char *bitV;
+
+
+
 //function to load file into global variable for MMAP...'fileMap'
 void loadFileToMMap(){
 
@@ -108,33 +113,30 @@ void *WriteToFileThread(void *args){
     //mes.buffer = (unsigned char *)malloc(MAXDATASIZE);
     memset(mes.buffer, '\0', MAXDATASIZE);
     while(1){
-        if(udpMessageQ.empty()){
+	pthread_mutex_lock(&udpMessageQLock);
+	if(udpMessageQ.empty()){
             printf("Nothing in message Queue, going on wait at client side\n");
-            pthread_mutex_lock(&udpMessageQLock);
             pthread_cond_wait(&udpMessageQCV, &udpMessageQLock);
-            pthread_mutex_unlock(&udpMessageQLock);
         }
 
-        pthread_mutex_lock(&udpMessageQLock);
         mes = udpMessageQ.front();
         udpMessageQ.pop_front();
         pthread_mutex_unlock(&udpMessageQLock);
 
-        //printf("Writing to file at client side...%llu, %lu, %s\n", mes.sequenceNum, mes.data_len, mes.buffer);
-        //fseek(f, mes.sequenceNum*MAXDATASIZE,SEEK_SET);
-        //fwrite(mes.buffer, 1, (size_t)&mes.data_len, f);
-        //for(int i = 0;i<mes.data_len;i++){
-        //fwrite(mes.buffer, 1, mes.data_len, f);
-        //}
+	printf("Writing in file %d\n", mes.sequenceNum) ;
         for(int i = 0; i < mes.data_len; i++){
             mapToFile[mes.sequenceNum*MAXDATASIZE+i] = mes.buffer[i];
         }
-        if(mes.data_len < MAXDATASIZE)
-            break;
+
+	// Check for the bitvector- termination
+	if(mes.sequenceNum == objParam.noOfSeq - 1)
+	    lastPacketReceived = true ;
+	if (lastPacketReceived && isBitVectorSet(bitV) && udpMessageQ.empty())
+	    break ;
+
         memset(mes.buffer, '\0', MAXDATASIZE);
     }
     printf("WriteToFile thread exiting at client...\n");
-    //fclose(f);
     unloadMMapForFile(fd);
     return 0;
 }
@@ -142,7 +144,6 @@ void *WriteToFileThread(void *args){
 // creating a mmap for writing to a file at the end
 int loadMMapForFile(unsigned char fileName[]){
 
-    int i;
     int fd;
     int result;
     //unsigned char *map;  /* mmapped array of int's */

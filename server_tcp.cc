@@ -76,7 +76,7 @@ int acceptRequest(struct sockaddr_storage &their_addr, int &sockfd, int &new_fd)
 }
 
 void *TCPserverThread(void *arg){
-    int sockfd, new_fd;  
+    int sockfd, new_fd, rv=0;  
     struct sockaddr_storage their_addr; 
     char s[INET6_ADDRSTRLEN];
 
@@ -98,15 +98,15 @@ void *TCPserverThread(void *arg){
 
 	inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), s, sizeof s);
 	printf("server: got connection from %s\n", s);
-    memcpy(clientName, s, sizeof(s));
+	memcpy(clientName, s, sizeof(s));
 
 	if (new_fd < 0){
 	    break ;
-//	    close(new_fd) ;
+	    //	    close(new_fd) ;
 	}
 	else
 	{ 
-//	    close(sockfd); // child doesn't need the listener
+	    //	    close(sockfd); // child doesn't need the listener
 	    // Initiate the TCP read thread
 	    int res = pthread_create(&tcpReadThread, NULL, TCPreadThread, (void *)new_fd); 
 	    if( res != 0){
@@ -149,8 +149,8 @@ void handleFileName(unsigned char *buffer, uint32_t data_len){
     fp = fopen(fileInfoObj.fileName.c_str(),"r"); 
     if(fp==NULL)
     {
-        cout << fileInfoObj.fileName << "The file doesn't exist " << endl;
- 	pushMessageInTCPq(0x1c, NULL, 0);
+	cout << fileInfoObj.fileName << "The file doesn't exist " << endl;
+	pushMessageInTCPq(0x1c, NULL, 0);
 	return;
     }
     if( stat(fileInfoObj.fileName.c_str(), &fileInfoObj.fileStat) < 0)
@@ -164,6 +164,14 @@ void handleFileName(unsigned char *buffer, uint32_t data_len){
     //	Thread writes the data to UDP write thread's list
     pthread_t PrepareBlockThread;
     pthread_create(&PrepareBlockThread, NULL, prepareBlockThread, &rv);
+
+    //Thread - Start UDP Server
+    pthread_t udpServerThread;	
+    int res = pthread_create(&udpServerThread, NULL, UDPserverThread, &rv);
+    if( res != 0){
+	fprintf(stderr, "TCP write thread creation failed\n") ;
+	exit(EXIT_FAILURE) ;
+    }
 }
 
 // Sets the bit vector

@@ -27,32 +27,23 @@ int main(int argc, char **argv){
 	    return 0;		
 
 	init() ;
+	lastPacketReceived = false ;
 	
-	pthread_t tcpConnectionThread;
-	int res = pthread_create(&tcpConnectionThread, NULL, TCPconnectionThread, &rv); 
-	if( res != 0){
-		fprintf(stderr, "TCP Connection thread creation failed\n") ;
-		exit(EXIT_FAILURE) ;
-	}
-
 	// Thread - udp client
 	pthread_t udpConnectionThread;
-	res = pthread_create(&udpConnectionThread, NULL, UDPconnectionThread, &rv); 
+	int res = pthread_create(&udpConnectionThread, NULL, UDPconnectionThread, &rv); 
 	if( res != 0){
 		fprintf(stderr, "UDP Connection thread creation failed\n") ;
 		exit(EXIT_FAILURE) ;
 	}
 	
-//	pthread_t writeToFileThread;
-//	res = pthread_create(&writeToFileThread, NULL, WriteToFileThread, &rv); 
-//	if( res != 0){
-//	    fprintf(stderr, "UDP Connection thread creation failed\n") ;
-//	    exit(EXIT_FAILURE) ;
-//	}
+	pthread_t tcpConnectionThread;
+	res = pthread_create(&tcpConnectionThread, NULL, TCPconnectionThread, &rv); 
+	if( res != 0){
+		fprintf(stderr, "TCP Connection thread creation failed\n") ;
+		exit(EXIT_FAILURE) ;
+	}
 
-	// Wait for all the threads to stop
-//	pthread_join(tcpConnectionThread, NULL);
-//	pthread_join(writeToFileThread, NULL);
 	pthread_join(udpConnectionThread, NULL);
 	printf("Client Exiting.....\n");
 }

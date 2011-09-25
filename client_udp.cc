@@ -62,13 +62,13 @@ void *UDPreadThread(void *temp){
 
     while (1){
 
-        printf("Waiting for UDP Packet....\n");
         n = recvfrom(udpSocketDataObj->sockfd,&mes,sizeof(mes),0,(struct sockaddr *)&from,(socklen_t *)&fromlen);
         if (n < 0){
             printf("Error: print on recvfrom");
             break;
         }
-        printf("Packet received by %d!!!\n", udpSocketDataObj->sockfd);
+        printf("Packet %d received by %d\n",mes.sequenceNum, udpSocketDataObj->sockfd);
+
 
         pthread_mutex_lock(&udpMessageQLock) ;
         // push the unsigned char in Q
@@ -77,6 +77,8 @@ void *UDPreadThread(void *temp){
         pthread_cond_signal(&udpMessageQCV) ;
         // release the lock
         pthread_mutex_unlock(&udpMessageQLock) ;
+	// Set the bit vector
+	writeBit(bitV, mes.sequenceNum, 0x01) ;
     }
     close(udpSocketDataObj->sockfd);
     return 0;
