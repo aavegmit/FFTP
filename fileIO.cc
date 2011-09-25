@@ -107,6 +107,7 @@ void getDataFromFile(uint64_t sequenceNum, unsigned char blockData[], uint32_t *
 //Write Thread of UDP server
 void *WriteToFileThread(void *args){
 
+    int count1 = 0 ;
     udpMessage mes;
     int fd = loadMMapForFile((unsigned char *)objParam.localFilePath.c_str());
     //FILE *f = fopen("temp.jpg", "wb");
@@ -123,7 +124,8 @@ void *WriteToFileThread(void *args){
         udpMessageQ.pop_front();
         pthread_mutex_unlock(&udpMessageQLock);
 
-	printf("Writing in file %d\n", mes.sequenceNum) ;
+	++count1 ;
+//	printf("Writing in file %d\n", mes.sequenceNum) ;
         for(int i = 0; i < mes.data_len; i++){
             mapToFile[mes.sequenceNum*MAXDATASIZE+i] = mes.buffer[i];
         }
@@ -135,6 +137,7 @@ void *WriteToFileThread(void *args){
 	    break ;
 
         memset(mes.buffer, '\0', MAXDATASIZE);
+	printf("write thread - %d\n", count1) ;
     }
     printf("WriteToFile thread exiting at client...\n");
     unloadMMapForFile(fd);

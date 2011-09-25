@@ -22,6 +22,8 @@ void *UDPserverThread(void *){
             printf("Error opening UDP socket\n");
             exit(0);
         }
+//	int x = fcntl(sockfd[i], F_GETFL, 0) ;
+//	fcntl(sockfd[i], F_SETFL, x | O_NONBLOCK) ;
     }
 
     server = gethostbyname((char *)clientName);
@@ -84,7 +86,7 @@ void *UDPwriteThread(void *temp){
         n = sendto(udpSocketDataObj->sockfd, &mes, sizeof(mes), 0,(struct sockaddr *) &udpSocketDataObj->serv_addr,sizeof(udpSocketDataObj->serv_addr));
         if (n < 0) {
             printf("ERROR writing to UDP socket\n");
-            exit(0);
+//            exit(0);
         }
     }
     return 0;

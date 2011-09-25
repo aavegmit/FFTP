@@ -9,7 +9,7 @@ list<udpMessage > udpMessageQ;
 pthread_mutex_t udpMessageQLock;
 pthread_cond_t udpMessageQCV;
 
-int udpPortList[5] = {42000, 42001, 42002, 42003, 42004};
+int udpPortList[20] = {42000, 42001, 42002, 42003, 42004, 42005, 42006, 42007, 42008, 42009, 42010, 42011, 42012, 42013, 42014, 42015, 42016, 42017, 42018, 42019};
 unsigned char clientName[] = CLIENT_NAME;
 bool shutDownFlag = false;
 

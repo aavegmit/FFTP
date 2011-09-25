@@ -1,4 +1,5 @@
 #include "client.h"
+int count2 ;
 // This thread is invoked from the client main function
 // after command line parsing. It includes setting up a 
 // UDP connection with the UDP server
@@ -57,6 +58,8 @@ void *UDPreadThread(void *temp){
     struct sockaddr_in from;
     struct udpSocketData *udpSocketDataObj = (struct udpSocketData *)temp;
     int fromlen = 0, n;
+    int count1 = 0 ;
+    count2= 0;
 
     fromlen = sizeof(struct sockaddr_in);
 
@@ -67,7 +70,7 @@ void *UDPreadThread(void *temp){
             printf("Error: print on recvfrom");
             break;
         }
-        printf("Packet %d received by %d\n",mes.sequenceNum, udpSocketDataObj->sockfd);
+//        printf("Packet %d received by %d\n",mes.sequenceNum, udpSocketDataObj->sockfd);
 
         pthread_mutex_lock(&udpMessageQLock) ;
         // push the unsigned char in Q
@@ -78,6 +81,7 @@ void *UDPreadThread(void *temp){
         pthread_mutex_unlock(&udpMessageQLock) ;
 	// Set the bit vector
 	writeBit(bitV, mes.sequenceNum, 0x01) ;
+//	printf("%d %d\n", count1, count2) ;
     }
     close(udpSocketDataObj->sockfd);
     return 0;
