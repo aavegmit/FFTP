@@ -12,42 +12,40 @@ void *UDPconnectionThread(void *){
     pthread_t udpReadThread[NUM_UDP_CONNECTION];
     pthread_t udpWriteThread[NUM_UDP_CONNECTION];
 
-    //signal(SIGCHLD,SIG_IGN);
     //Creating a DATAGRAM socket
     for(int i = 0;i<NUM_UDP_CONNECTION;i++){
-        sockfd[i] = socket(AF_INET, SOCK_DGRAM, 0);
-        if (sockfd[i] < 0){ 
-            printf("printf opening UDP sockets!!!\n");
-            exit(0);
-        } 
+	sockfd[i] = socket(AF_INET, SOCK_DGRAM, 0);
+	if (sockfd[i] < 0){ 
+	    printf("printf opening UDP sockets!!!\n");
+	    exit(0);
+	} 
 
-        bzero((char *) &serv_addr[i], sizeof(serv_addr[i]));
+	bzero((char *) &serv_addr[i], sizeof(serv_addr[i]));
 
-        serv_addr[i].sin_family = AF_INET;
-        serv_addr[i].sin_addr.s_addr = INADDR_ANY;
-        serv_addr[i].sin_port = htons(udpPortList[i]);
-        if (bind(sockfd[i], (struct sockaddr *) &serv_addr[i],sizeof(serv_addr[i])) < 0) 
-            printf("printf on binding");
+	serv_addr[i].sin_family = AF_INET;
+	serv_addr[i].sin_addr.s_addr = INADDR_ANY;
+	serv_addr[i].sin_port = htons(udpPortList[i]);
+	if (bind(sockfd[i], (struct sockaddr *) &serv_addr[i],sizeof(serv_addr[i])) < 0) 
+	    printf("printf on binding");
 
-        udpSocketDataObj = (struct udpSocketData *)malloc(sizeof(struct udpSocketData));
-        udpSocketDataObj->sockfd = sockfd[i];
-        udpSocketDataObj->myId = i;
-        //printf("SOCKET IS: %d\n", udpSocketDataObj->sockfd);
-        udpSocketDataObj->serv_addr = serv_addr[i];
+	udpSocketDataObj = (struct udpSocketData *)malloc(sizeof(struct udpSocketData));
+	udpSocketDataObj->sockfd = sockfd[i];
+	udpSocketDataObj->myId = i;
+	udpSocketDataObj->serv_addr = serv_addr[i];
 
-        listOfThreads.push_back(udpWriteThread[i]);
-        listOfThreads.push_back(udpReadThread[i]);
-        listOfSockfd.push_back(sockfd[i]);
+	listOfThreads.push_back(udpWriteThread[i]);
+	listOfThreads.push_back(udpReadThread[i]);
+	listOfSockfd.push_back(sockfd[i]);
 
-        pthread_create(&udpWriteThread[i], NULL, UDPwriteThread, (void *)udpSocketDataObj);
-        pthread_create(&udpReadThread[i], NULL, UDPreadThread, (void *)udpSocketDataObj);
-        memset(&udpSocketDataObj, 0, sizeof(udpSocketDataObj));
+	pthread_create(&udpWriteThread[i], NULL, UDPwriteThread, (void *)udpSocketDataObj);
+	pthread_create(&udpReadThread[i], NULL, UDPreadThread, (void *)udpSocketDataObj);
+	memset(&udpSocketDataObj, 0, sizeof(udpSocketDataObj));
     }
 
 
     for(int i = 0;i < NUM_UDP_CONNECTION;i++){
-        pthread_join(udpWriteThread[i], NULL);
-        pthread_join(udpReadThread[i], NULL);
+	pthread_join(udpWriteThread[i], NULL);
+	pthread_join(udpReadThread[i], NULL);
     }
     return 0;
 
@@ -60,7 +58,6 @@ void *UDPconnectionThread(void *){
 void *UDPreadThread(void *temp){
 
     udpMessage mes;
-    //struct sockaddr_storage from;
     struct sockaddr_in from;
     struct udpSocketData *udpSocketDataObj = (struct udpSocketData *)temp;
     int fromlen = 0, n;
@@ -71,29 +68,27 @@ void *UDPreadThread(void *temp){
 
     while (!shutDownFlag){
 
-        //signal(SIGUSR1, my_handler);
-        n = recvfrom(udpSocketDataObj->sockfd,&mes,sizeof(mes),0,(struct sockaddr *)&from,(socklen_t *)&fromlen);
-        if (n < 0 || shutDownFlag){
-            printf("Error: print on recvfrom");
-            //break;
-            if(shutDownFlag)
-                pthread_exit(0);
-        }
-//        printf("Packet %d received by %d\n",mes.sequenceNum, udpSocketDataObj->sockfd);
+	n = recvfrom(udpSocketDataObj->sockfd,&mes,sizeof(mes),0,(struct sockaddr *)&from,(socklen_t *)&fromlen);
+	if (n < 0 || shutDownFlag){
+	    printf("Error: print on recvfrom");
+	    if(shutDownFlag)
+		pthread_exit(0);
+	}
+	//        printf("Packet %d received by %d\n",mes.sequenceNum, udpSocketDataObj->sockfd);
 
-        pthread_mutex_lock(&udpMessageClientQLock) ;
-        // push the unsigned char in Q
-        udpMessageClientQ.push_back(mes) ;
-        // Signal the write thread to wake up
-        pthread_cond_signal(&udpMessageClientQCV) ;
-        // release the lock
-        pthread_mutex_unlock(&udpMessageClientQLock) ;
-	// Set the bit vector
-	writeBit(bitV, mes.sequenceNum, 0x01) ;
-//	printf("%d %d\n", count1, count2) ;
+	if (readBit(bitV, mes.sequenceNum) == 0x00){
+	    pthread_mutex_lock(&udpMessageClientQLock) ;
+	    // push the unsigned char in Q
+	    udpMessageClientQ.push_back(mes) ;
+	    // Signal the write thread to wake up
+	    pthread_cond_signal(&udpMessageClientQCV) ;
+	    // release the lock
+	    pthread_mutex_unlock(&udpMessageClientQLock) ;
+	    // Set the bit vector
+	    writeBit(bitV, mes.sequenceNum, 0x01) ;
+	}
     }
     close(udpSocketDataObj->sockfd);
-    //return 0;
     pthread_exit(0);
 }
 
@@ -102,6 +97,5 @@ void *UDPreadThread(void *temp){
 void *UDPwriteThread(void *){
 
     printf("In the client's UDP write mode.....\n");
-    //return 0;
     pthread_exit(0);
 }

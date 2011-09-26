@@ -51,7 +51,7 @@ void writeToCache(uint64_t sequenceNum, udpMessage mes, bool packetType){
 
 	if(packetType == LOST_PACKET){
 	    if(cachedUDPRandomPacketList.size() == 0){
-		printf("Need more cache space....no random packets...only lost packets\n");
+//		printf("Need more cache space....no random packets...only lost packets\n");
 	    }
 	    else{
 		uint64_t tempSeqNum = getCachedUDPRandomPacket();
@@ -62,7 +62,7 @@ void writeToCache(uint64_t sequenceNum, udpMessage mes, bool packetType){
 	}
     }
     else{
-	printf("Writing packet to cache...%llu, %lu\n", mes.sequenceNum, mes.data_len);
+//	printf("Writing packet to cache...%llu, %lu\n", mes.sequenceNum, mes.data_len);
 	udpPacketCache[sequenceNum] = mes;
 	if(packetType == RANDOM_PACKET){
 	    addToCachedUDPRandomPacketList(sequenceNum);

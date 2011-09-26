@@ -40,8 +40,10 @@ bool isBitVectorSet(unsigned char *str){
     if (objParam.noOfSeq % 8 == 0){
 	noOfBytes = objParam.noOfSeq / 8 ;
 	for (int i = 0; i < noOfBytes; ++i){
-	    if((str[i] & 0xff) != 0xff)
+	    if(str[i] != 0xff){
+		printf("Byte %d, value - %02x\n", i, str[i]) ;
 		return false ;
+	    }
 	}
     }
     else{

@@ -189,25 +189,25 @@ void handleACKlist(unsigned char *buffer, uint32_t data_len){
     uint64_t seq_num, last_seq_num, current_seq_num ;
     memcpy(&seq_num, buffer, 8) ;
     memcpy(&last_seq_num, buffer + 8, 8) ;
-    printf("Server receives a ACK list from the client...%d - %d\n", seq_num, last_seq_num) ;
-    for(uint64_t i = (seq_num%8) ; i < last_seq_num - (seq_num / 8)*8 ; ++i){
+    printf("Server receives a ACK list from the client...%llu - %llu\n", seq_num, last_seq_num) ;
+    for(uint64_t i = (seq_num%8) ; i <= last_seq_num - (seq_num / 8)*8 ; ++i){
         current_seq_num = (seq_num/8)*8 + i ;
         if(readBit(buffer+16, i) == 0x01){
             printf("Packet received - %ld\n", current_seq_num) ;
             removeFromUDPPacketCache(current_seq_num) ;
+	    if (current_seq_num == uptoPacketSent + 1)
+		uptoPacketSent = current_seq_num ;
         }
         else{
-            pthread_mutex_lock(&sequenceNumberListLock);
-            sequenceNumberList.push_front(current_seq_num);
-            pthread_mutex_unlock(&sequenceNumberListLock);
             writeToCache(current_seq_num, getUDPpacketFromSeqNum(current_seq_num), LOST_PACKET ) ;
+	    pushSequenceNumberInList(current_seq_num) ;
             printf("Packet lost - %d\n", current_seq_num) ;
         }
     }
 }
 
 void sendAckRequest(uint64_t seq_num, uint64_t last_seq_num){
-    printf("Sending Ack request\n") ;
+    printf("Sending Ack request %d - %d\n", seq_num, last_seq_num) ;
     unsigned char *buffer = (unsigned char *)malloc(16) ;
     memcpy(buffer, &seq_num, 8) ;
     memcpy(buffer+8, &last_seq_num, 8);

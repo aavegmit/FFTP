@@ -17,10 +17,8 @@
 #define TCP_BACKLOG 10
 #define TCP_HEADER_SIZE 5
 #define NUM_UDP_CONNECTION 10
-#define CLIENT_NAME "localhost"
-#define FILE_NAME "/media/My DATA/PICS/WALLPAPERS/google_search.jpg"
-//#define FILE_NAME "TODO"
 #define RANDOM_PACKET 0
 #define LOST_PACKET 1
 #define MAX_CACHE_SIZE 100
-#define ACK_SENDING_RATIO 5
+#define ACK_SENDING_RATIO 10 
+#define CRITICAL_ACK_SENDING_GAP 100

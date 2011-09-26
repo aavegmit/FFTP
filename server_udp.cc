@@ -92,7 +92,7 @@ void *UDPwriteThread(void *temp){
         n = sendto(udpSocketDataObj->sockfd, &mes, sizeof(mes), 0,(struct sockaddr *) &udpSocketDataObj->serv_addr,sizeof(udpSocketDataObj->serv_addr));
         if (n < 0) {
             printf("ERROR writing to UDP socket\n");
-//            exit(0);
+	    pthread_exit(0) ;
         }
     }
     return 0;

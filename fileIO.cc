@@ -57,11 +57,13 @@ void populateSequenceNumberList(){
     uint64_t q = fileInfoObj.fileStat.st_size/MAXDATASIZE;
     uint64_t r = fileInfoObj.fileStat.st_size%MAXDATASIZE;
 
+    objParam.noOfSeq = q ;
     for(uint64_t i=0;i<q;i++){
         sequenceNumberList.push_back(i);
     }
     if(r > 0){
         sequenceNumberList.push_back(q);
+	++objParam.noOfSeq ;
     }
     pthread_mutex_unlock(&sequenceNumberListLock);
 }
@@ -106,10 +108,11 @@ void *WriteToFileThread(void *args){
     udpMessage mes;
     int fd = loadMMapForFile((unsigned char *)objParam.localFilePath.c_str());
     memset(mes.buffer, '\0', MAXDATASIZE);
+
     while(1){
 	pthread_mutex_lock(&udpMessageClientQLock);
 	if(udpMessageClientQ.empty()){
-            printf("Nothing in message Queue, going on wait at client side\n");
+//            printf("Nothing in message Queue, going on wait at client side\n");
             pthread_cond_wait(&udpMessageClientQCV, &udpMessageClientQLock);
         }
 
@@ -117,18 +120,21 @@ void *WriteToFileThread(void *args){
         udpMessageClientQ.pop_front();
         pthread_mutex_unlock(&udpMessageClientQLock);
 
-	++count1 ;
         for(int i = 0; i < mes.data_len; i++){
             mapToFile[mes.sequenceNum*MAXDATASIZE+i] = mes.buffer[i];
         }
 	// Check for the bitvector- termination
-	if(mes.sequenceNum == objParam.noOfSeq - 1)
+	if(mes.sequenceNum == objParam.noOfSeq - 1){
 	    lastPacketReceived = true ;
-	if (lastPacketReceived && isBitVectorSet(bitV) && udpMessageClientQ.empty())
-	    break ;
+	    printf("Last packet received....\n") ;
+	}
+	if (lastPacketReceived)
+	    if (udpMessageQ.empty())
+		if (isBitVectorSet(bitV))
+		    break ;
 
         memset(mes.buffer, '\0', MAXDATASIZE);
-	printf("write thread - %d\n", count1) ;
+//	printf("write thread - %d\n", count1) ;
     }
     printf("WriteToFile thread exiting at client...\n");
     unloadMMapForFile(fd);

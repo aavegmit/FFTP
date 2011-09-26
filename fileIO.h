@@ -79,4 +79,6 @@ int loadMMapForFile(unsigned char[]);
 
 //unloads MMap to write into file at client side
 void unloadMMapForFile(int);
+
+void pushSequenceNumberInList(uint64_t) ;
 #endif

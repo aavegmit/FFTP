@@ -23,7 +23,7 @@ struct udpSocketData{
     int myId;
 };
 
-// List maintaining all the sequence numbers to be sent
+extern long uptoPacketSent ;
 
 void *TCPserverThread(void *);
 void *UDPserverThread(void *);
@@ -42,4 +42,6 @@ void pushBlockInUDPWrite() ;
 
 void sendAckRequest(uint64_t, uint64_t) ;
 udpMessage getUDPpacketFromSeqNum(uint64_t) ;
+bool shouldSendAck(long) ;
+extern long lastSeqNumForAck ;
 #endif

@@ -1,8 +1,15 @@
 #include "server.h"
 
+long noOfPacketsSent;
+long uptoPacketSent;
+long lastSeqNumForAck;
+
 int main(int argc, char **argv){
 
     int rv = 0;
+    noOfPacketsSent = 0 ;
+    uptoPacketSent = 0 ;
+    lastSeqNumForAck = 0 ;
 
     init() ;
 
@@ -32,19 +39,20 @@ void *prepareBlockThread(void *args){
 
         pthread_mutex_lock(&sequenceNumberListLock);
         while(sequenceNumberList.size() == 0){
-            
+	    sendAckRequest(uptoPacketSent, lastSeqNumForAck) ;
             pthread_cond_wait(&sequenceNumberListCV, &sequenceNumberListLock);
-            //pthread_mutex_unlock(&sequenceNumberListLock);
-
         }
-        //else
-          //  pthread_mutex_unlock(&sequenceNumberListLock);
-
-        //reading from the start of sequence number list
-        //pthread_mutex_lock(&sequenceNumberListLock);
         sequenceNum = sequenceNumberList.front();
         sequenceNumberList.pop_front();
         pthread_mutex_unlock(&sequenceNumberListLock);
+//	printf("%d out of seq list\n", sequenceNum) ;
+
+	// Increase the number of packets for ACK handling
+	++noOfPacketsSent ;
+	if(shouldSendAck(noOfPacketsSent)){
+	    sendAckRequest(uptoPacketSent, lastSeqNumForAck) ;
+	}
+	
 
         //first check in cache
         if(inUDPpacketCache(sequenceNum)){
@@ -68,6 +76,8 @@ void *prepareBlockThread(void *args){
         }
 
         pushMessageInUDPq(sequenceNum, size, fileData, myId);
+	if(lastSeqNumForAck < sequenceNum)
+	    lastSeqNumForAck = sequenceNum ;
 
         memset(fileData, '\0',MAXDATASIZE+1);
     }
@@ -87,4 +97,18 @@ udpMessage getUDPpacketFromSeqNum(uint64_t sequenceNum){
     udpMessage mes = getUDPpacketFromData(sequenceNum, size, fileData);
     free(fileData) ;
     return mes;
+}
+
+bool shouldSendAck(long numPacketsSent){
+    if(numPacketsSent < objParam.noOfSeq){
+	if (numPacketsSent % (objParam.noOfSeq / ACK_SENDING_RATIO) == 0)
+	    return true;
+    }
+    else if(numPacketsSent == objParam.noOfSeq)
+	return true;
+    else{
+	if((numPacketsSent - objParam.noOfSeq) % CRITICAL_ACK_SENDING_GAP == 0)
+	    return true;
+    }
+    return false;
 }
