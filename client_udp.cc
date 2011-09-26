@@ -63,6 +63,7 @@ void *UDPreadThread(void *temp){
     int fromlen = 0, n;
     int count1 = 0 ;
     count2= 0;
+    dropPacketCount = 0 ;
 
     fromlen = sizeof(struct sockaddr_in);
 
@@ -86,6 +87,9 @@ void *UDPreadThread(void *temp){
 	    pthread_mutex_unlock(&udpMessageClientQLock) ;
 	    // Set the bit vector
 	    writeBit(bitV, mes.sequenceNum, 0x01) ;
+	}
+	else{
+	    ++dropPacketCount;
 	}
     }
     close(udpSocketDataObj->sockfd);

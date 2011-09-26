@@ -69,7 +69,7 @@ extern unsigned char clientName[255];
 extern uint64_t seq_num_count;
 
 extern bool shutDownFlag ;
-
 extern list<pthread_t > listOfThreads;
 extern list<int > listOfSockfd;
+extern uint64_t dropPacketCount ;
 #endif

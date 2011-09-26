@@ -134,12 +134,12 @@ void *WriteToFileThread(void *args){
 		    break ;
 
         memset(mes.buffer, '\0', MAXDATASIZE);
-//	printf("write thread - %d\n", count1) ;
     }
     printf("WriteToFile thread exiting at client...\n");
     unloadMMapForFile(fd);
+    printf("Retransmitted Packets count %d\n", dropPacketCount) ;
     shutDown();
-    return 0;
+    exit(0) ;
 }
 
 // creating a mmap for writing to a file at the end
