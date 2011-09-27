@@ -3,13 +3,17 @@
 long noOfPacketsSent;
 long uptoPacketSent;
 long lastSeqNumForAck;
+long noOfAckSent;
+long noOfAckRecd;
 
 int main(int argc, char **argv){
 
     int rv = 0;
     noOfPacketsSent = 0 ;
-    uptoPacketSent = 0 ;
+    uptoPacketSent = -1 ;
     lastSeqNumForAck = 0 ;
+    noOfAckSent = 0 ;
+    noOfAckRecd = 0 ;
 
     init() ;
 
@@ -56,7 +60,7 @@ void *prepareBlockThread(void *args){
 
         //first check in cache
         if(inUDPpacketCache(sequenceNum)){
-            printf("Found packet in cache...\n");
+//            printf("Found packet in cache...\n");
             pthread_mutex_lock(&udpPacketCacheLock);
             mes = udpPacketCache[sequenceNum];
             memcpy(fileData, mes.buffer, mes.data_len);
@@ -100,6 +104,8 @@ udpMessage getUDPpacketFromSeqNum(uint64_t sequenceNum){
 }
 
 bool shouldSendAck(long numPacketsSent){
+    if(noOfAckSent != noOfAckRecd)
+	return false;
     if(numPacketsSent < objParam.noOfSeq){
 	if (numPacketsSent % (objParam.noOfSeq / ACK_SENDING_RATIO) == 0)
 	    return true;

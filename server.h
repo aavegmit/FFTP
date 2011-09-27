@@ -40,8 +40,10 @@ void handleFileName(unsigned char *, uint32_t) ;
 void pushBlockInUDPWrite() ;
 //void pushMessageInTCPq(uint8_t, unsigned char *, uint32_t) ;
 
-void sendAckRequest(uint64_t, uint64_t) ;
+void sendAckRequest(int64_t, uint64_t) ;
 udpMessage getUDPpacketFromSeqNum(uint64_t) ;
 bool shouldSendAck(long) ;
 extern long lastSeqNumForAck ;
+extern long noOfAckSent ;
+extern long noOfAckRecd ;
 #endif
