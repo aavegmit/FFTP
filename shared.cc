@@ -3,6 +3,7 @@
 list<tcpMessage> tcpMessageQ ;
 pthread_mutex_t tcpMessageQLock;
 pthread_cond_t tcpMessageQCV;
+pthread_mutex_t packetSentLock;
 
 //message Queue for UDP server write thread
 list<udpMessage > udpMessageQ[NUM_UDP_CONNECTION];
@@ -28,6 +29,10 @@ void init(){
 	fprintf(stderr, "Lock init failed\n") ;
     }
 
+    res = pthread_mutex_init(&packetSentLock, NULL);
+    if (res != 0){
+	fprintf(stderr, "Lock init failed\n") ;
+    }
     res = pthread_cond_init(&tcpMessageQCV, NULL);
     if (res != 0){
 	fprintf(stderr, "CV init failed\n") ;
@@ -78,9 +83,8 @@ void *TCPreadThread(void *args){
 	buffer = (unsigned char *)realloc(buffer, data_len) ;
 
 	numbytes = (int)read(sockfd, buffer, data_len) ;
-	if (numbytes != (int)data_len || shutDownFlag){
-	    //fprintf(stderr, "Error in buffer\n") ; 
-        //printf("Shutdownflag = %d, numbytes = %d, data_len = %d\n",shutDownFlag, numbytes, (int)data_len);
+	if ((numbytes != (int)data_len) || shutDownFlag){
+//	    fprintf(stderr, "Error in buffer\n") ; 
 	    pthread_exit(0);
 	}
 

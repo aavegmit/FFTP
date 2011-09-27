@@ -201,7 +201,8 @@ void handleACKlist(unsigned char *buffer, uint32_t data_len){
         }
         else{
             writeToCache(current_seq_num, getUDPpacketFromSeqNum(current_seq_num), LOST_PACKET ) ;
-	    pushSequenceNumberInList(current_seq_num) ;
+	    if(!toBeSend[current_seq_num])
+		pushSequenceNumberInList(current_seq_num) ;
 //            printf("Packet lost - %d\n", current_seq_num) ;
         }
     }

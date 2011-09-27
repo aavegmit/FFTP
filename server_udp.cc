@@ -74,7 +74,6 @@ void *UDPwriteThread(void *temp){
     while(1){
         pthread_mutex_lock(&udpMessageQLock[myId]);
         while(udpMessageQ[myId].empty()){
-            //printf("Nothing in message Queue, going on wait\n");
             pthread_cond_wait(&udpMessageQCV[myId], &udpMessageQLock[myId]);
         }
 
@@ -82,18 +81,19 @@ void *UDPwriteThread(void *temp){
         udpMessageQ[myId].pop_front();
         pthread_mutex_unlock(&udpMessageQLock[myId]);
 
-        /*********************************
-        if(counter % 20 == 0 && counter != 0)
-            usleep(10000);
-        *******************************/
-
-        counter++;
-        //printf("Sending %d UDP Packets to client....%d is sending : %llu\n",mes.sequenceNum, udpSocketDataObj->sockfd, counter);
+//        /*********************************/
+//        if(counter % 20 == 0 && counter != 0)
+//            usleep(10000);
+//        /*******************************/
+//
+//        counter++;
+//        printf("Sending %d UDP Packets to client....%d is sending : %llu\n",mes.sequenceNum, udpSocketDataObj->sockfd, counter);
         n = sendto(udpSocketDataObj->sockfd, &mes, sizeof(mes), 0,(struct sockaddr *) &udpSocketDataObj->serv_addr,sizeof(udpSocketDataObj->serv_addr));
         if (n < 0) {
             printf("ERROR writing to UDP socket\n");
 	    pthread_exit(0) ;
         }
+	toBeSend[mes.sequenceNum] = false ;
     }
     return 0;
 }

@@ -5,7 +5,6 @@ long uptoPacketSent;
 long lastSeqNumForAck;
 long noOfAckSent;
 long noOfAckRecd;
-map<long, bool> toBeSend;
 
 int main(int argc, char **argv){
 
@@ -54,10 +53,12 @@ void *prepareBlockThread(void *args){
 //	printf("%d out of seq list\n", sequenceNum) ;
 
 	// Increase the number of packets for ACK handling
+	pthread_mutex_lock(&packetSentLock) ;
 	++noOfPacketsSent ;
 	if(shouldSendAck(noOfPacketsSent)){
 	    sendAckRequest(uptoPacketSent, lastSeqNumForAck) ;
 	}
+	pthread_mutex_unlock(&packetSentLock) ;
 	
 
         //first check in cache

@@ -18,8 +18,8 @@ using namespace std ;
 
 struct udpSocketData{
 
-	struct sockaddr_in serv_addr;
-	int sockfd;
+    struct sockaddr_in serv_addr;
+    int sockfd;
     int myId;
 };
 
@@ -46,5 +46,4 @@ bool shouldSendAck(long) ;
 extern long lastSeqNumForAck ;
 extern long noOfAckSent ;
 extern long noOfAckRecd ;
-extern map<long, bool> toBeSend;
 #endif

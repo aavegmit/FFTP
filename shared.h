@@ -62,6 +62,7 @@ extern pthread_cond_t udpMessageQCV[NUM_UDP_CONNECTION];
 extern list<udpMessage > udpMessageClientQ;
 extern pthread_mutex_t udpMessageClientQLock;
 extern pthread_cond_t udpMessageClientQCV;
+extern pthread_mutex_t packetSentLock ;
 
 extern int udpPortList[20];
 extern unsigned char clientName[255];

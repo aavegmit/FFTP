@@ -30,6 +30,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <map>
 
 using namespace std ;
 
@@ -49,6 +50,7 @@ typedef struct paramT{
 }param;
 
 extern param objParam;
+extern map<long, bool> toBeSend;
 
 extern unsigned char *fileMap;
 extern struct stat fileStat;
