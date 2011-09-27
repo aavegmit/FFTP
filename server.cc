@@ -5,6 +5,7 @@ long uptoPacketSent;
 long lastSeqNumForAck;
 long noOfAckSent;
 long noOfAckRecd;
+map<long, bool> toBeSend;
 
 int main(int argc, char **argv){
 

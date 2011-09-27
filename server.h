@@ -46,4 +46,5 @@ bool shouldSendAck(long) ;
 extern long lastSeqNumForAck ;
 extern long noOfAckSent ;
 extern long noOfAckRecd ;
+extern map<long, bool> toBeSend;
 #endif
