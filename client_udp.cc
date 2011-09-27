@@ -12,7 +12,7 @@ void *UDPconnectionThread(void *){
     pthread_t udpReadThread[NUM_UDP_CONNECTION];
     pthread_t udpWriteThread[NUM_UDP_CONNECTION];
 
-    signal(SIGCHLD,SIG_IGN);
+    //signal(SIGCHLD,SIG_IGN);
     //Creating a DATAGRAM socket
     for(int i = 0;i<NUM_UDP_CONNECTION;i++){
         sockfd[i] = socket(AF_INET, SOCK_DGRAM, 0);
@@ -34,6 +34,11 @@ void *UDPconnectionThread(void *){
         udpSocketDataObj->myId = i;
         //printf("SOCKET IS: %d\n", udpSocketDataObj->sockfd);
         udpSocketDataObj->serv_addr = serv_addr[i];
+
+        listOfThreads.push_back(udpWriteThread[i]);
+        listOfThreads.push_back(udpReadThread[i]);
+        listOfSockfd.push_back(sockfd[i]);
+
         pthread_create(&udpWriteThread[i], NULL, UDPwriteThread, (void *)udpSocketDataObj);
         pthread_create(&udpReadThread[i], NULL, UDPreadThread, (void *)udpSocketDataObj);
         memset(&udpSocketDataObj, 0, sizeof(udpSocketDataObj));
@@ -64,12 +69,15 @@ void *UDPreadThread(void *temp){
 
     fromlen = sizeof(struct sockaddr_in);
 
-    while (1){
+    while (!shutDownFlag){
 
+        //signal(SIGUSR1, my_handler);
         n = recvfrom(udpSocketDataObj->sockfd,&mes,sizeof(mes),0,(struct sockaddr *)&from,(socklen_t *)&fromlen);
-        if (n < 0){
+        if (n < 0 || shutDownFlag){
             printf("Error: print on recvfrom");
-            break;
+            //break;
+            if(shutDownFlag)
+                pthread_exit(0);
         }
 //        printf("Packet %d received by %d\n",mes.sequenceNum, udpSocketDataObj->sockfd);
 
@@ -85,7 +93,8 @@ void *UDPreadThread(void *temp){
 //	printf("%d %d\n", count1, count2) ;
     }
     close(udpSocketDataObj->sockfd);
-    return 0;
+    //return 0;
+    pthread_exit(0);
 }
 
 // This thread might not be of any use, so we wont
@@ -93,5 +102,6 @@ void *UDPreadThread(void *temp){
 void *UDPwriteThread(void *){
 
     printf("In the client's UDP write mode.....\n");
-    return 0;
+    //return 0;
+    pthread_exit(0);
 }

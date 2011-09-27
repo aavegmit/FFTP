@@ -45,6 +45,7 @@ int main(int argc, char **argv){
 	}
 
 	pthread_join(udpConnectionThread, NULL);
+    pthread_join(tcpConnectionThread, NULL);
 	printf("Client Exiting.....\n");
 }
 

@@ -79,9 +79,12 @@ void *TCPconnectionThread(void *arg){
     // SEND file name to the server using TCP connection
     pushMessageInTCPq(0x1a,(unsigned char *)objParam.serverFilePath.c_str(), (int)objParam.serverFilePath.size());
 
+    listOfThreads.push_back(tcpReadThread);
+    listOfThreads.push_back(tcpWriteThread);
+    listOfSockfd.push_back(sockfd);
     pthread_join(tcpReadThread, NULL);
     pthread_join(tcpWriteThread, NULL);
-    close(sockfd);
+    //close(sockfd);
     pthread_exit(0);
 }
 

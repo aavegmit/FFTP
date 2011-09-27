@@ -63,11 +63,6 @@ void populateSequenceNumberList(){
     if(r > 0){
         sequenceNumberList.push_back(q);
     }
-    /*	while(!sequenceNumberList.empty()){
-        printf("sequence number is : %d\n",sequenceNumberList.front());
-        sequenceNumberList.pop_front();
-        }
-     */
     pthread_mutex_unlock(&sequenceNumberListLock);
 }
 
@@ -110,8 +105,6 @@ void *WriteToFileThread(void *args){
     int count1 = 0 ;
     udpMessage mes;
     int fd = loadMMapForFile((unsigned char *)objParam.localFilePath.c_str());
-    //FILE *f = fopen("temp.jpg", "wb");
-    //mes.buffer = (unsigned char *)malloc(MAXDATASIZE);
     memset(mes.buffer, '\0', MAXDATASIZE);
     while(1){
 	pthread_mutex_lock(&udpMessageClientQLock);
@@ -125,11 +118,9 @@ void *WriteToFileThread(void *args){
         pthread_mutex_unlock(&udpMessageClientQLock);
 
 	++count1 ;
-//	printf("Writing in file %d\n", mes.sequenceNum) ;
         for(int i = 0; i < mes.data_len; i++){
             mapToFile[mes.sequenceNum*MAXDATASIZE+i] = mes.buffer[i];
         }
-
 	// Check for the bitvector- termination
 	if(mes.sequenceNum == objParam.noOfSeq - 1)
 	    lastPacketReceived = true ;
@@ -141,6 +132,7 @@ void *WriteToFileThread(void *args){
     }
     printf("WriteToFile thread exiting at client...\n");
     unloadMMapForFile(fd);
+    shutDown();
     return 0;
 }
 

@@ -45,6 +45,8 @@ void pushMessageInUDPq(uint64_t, uint32_t, unsigned char* , int);
 void pushMessageInTCPq(uint8_t, unsigned char *, uint32_t) ;
 //creates a udp packet for caching purposes
 udpMessage getUDPpacketFromData(uint64_t, uint32_t, unsigned char*);
+//For shutdown purposes
+void shutDown();
 
 extern list<tcpMessage > tcpMessageQ ;
 extern pthread_mutex_t tcpMessageQLock;
@@ -67,4 +69,7 @@ extern unsigned char clientName[255];
 extern uint64_t seq_num_count;
 
 extern bool shutDownFlag ;
+
+extern list<pthread_t > listOfThreads;
+extern list<int > listOfSockfd;
 #endif

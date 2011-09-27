@@ -22,8 +22,6 @@ void *UDPserverThread(void *){
             printf("Error opening UDP socket\n");
             exit(0);
         }
-//	int x = fcntl(sockfd[i], F_GETFL, 0) ;
-//	fcntl(sockfd[i], F_SETFL, x | O_NONBLOCK) ;
     }
 
     server = gethostbyname((char *)clientName);
@@ -62,7 +60,7 @@ void *UDPserverThread(void *){
 void *UDPreadThread(void *udpSocketDataObj){
 
 //    printf("In the UDP read thread.....\n");
-    return 0;
+    pthread_exit(0);
 }
 
 //Write Thread of UDP server
@@ -73,12 +71,6 @@ void *UDPwriteThread(void *temp){
     udpMessage mes;
     int n;
     uint64_t counter = 0;
-    /*timeval tv;
-    tv.tv_sec = 0;
-    tv.tv_usec = 1000;
-    fd_set fdwrite;
-    FD_ZERO(&fdwrite);
-    FD_SET(udpSocketDataObj->sockfd, &fdwrite);*/
     while(1){
         pthread_mutex_lock(&udpMessageQLock[myId]);
         while(udpMessageQ[myId].empty()){
@@ -90,9 +82,11 @@ void *UDPwriteThread(void *temp){
         udpMessageQ[myId].pop_front();
         pthread_mutex_unlock(&udpMessageQLock[myId]);
 
-        //usleep(10);
-        //int res = select((udpSocketDataObj->sockfd + (udpSocketDataObj->sockfd - NUM_UDP_CONNECTION) + 1) , NULL, &fdwrite, NULL,&tv);
-        //if(res){
+        /*********************************/
+        if(counter % 20 == 0 && counter != 0)
+            usleep(10000);
+        /*******************************/
+
         counter++;
         printf("Sending %d UDP Packets to client....%d is sending : %llu\n",mes.sequenceNum, udpSocketDataObj->sockfd, counter);
         n = sendto(udpSocketDataObj->sockfd, &mes, sizeof(mes), 0,(struct sockaddr *) &udpSocketDataObj->serv_addr,sizeof(udpSocketDataObj->serv_addr));
@@ -100,7 +94,6 @@ void *UDPwriteThread(void *temp){
             printf("ERROR writing to UDP socket\n");
 //            exit(0);
         }
-        //}
     }
     return 0;
 }

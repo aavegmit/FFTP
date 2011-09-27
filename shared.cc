@@ -13,6 +13,9 @@ list<udpMessage > udpMessageClientQ;
 pthread_mutex_t udpMessageClientQLock;
 pthread_cond_t udpMessageClientQCV;
 
+list<pthread_t > listOfThreads;
+list<int > listOfSockfd;
+
 int udpPortList[20] = {42000, 42001, 42002, 42003, 42004, 42005, 42006, 42007, 42008, 42009, 42010, 42011, 42012, 42013, 42014, 42015, 42016, 42017, 42018, 42019};
 unsigned char clientName[] = CLIENT_NAME;
 bool shutDownFlag = false;
@@ -59,10 +62,10 @@ void *TCPreadThread(void *args){
     buffer = (unsigned char *)malloc(1) ;
 
     // While(1) needs to be changed to some shutdown variable
-    while(1){
+    while(!shutDownFlag){
 	memset(header, 0x00, TCP_HEADER_SIZE) ;
 	numbytes = (int)read(sockfd, header, TCP_HEADER_SIZE) ;
-	if (numbytes != TCP_HEADER_SIZE){
+	if (numbytes != TCP_HEADER_SIZE || shutDownFlag){
 	    fprintf(stderr, "Error in HEADER\n") ; 
 	    pthread_exit(0);
 	}
@@ -74,7 +77,7 @@ void *TCPreadThread(void *args){
 	buffer = (unsigned char *)realloc(buffer, data_len) ;
 
 	numbytes = (int)read(sockfd, buffer, data_len) ;
-	if (numbytes != (int)data_len){
+	if (numbytes != (int)data_len || shutDownFlag){
 	    fprintf(stderr, "Error in buffer\n") ; 
 	    pthread_exit(0);
 	}
@@ -92,10 +95,15 @@ void *TCPwriteThread(void *args){
     tcpMessage mes ;
 
     // Instead of while(1) check to see if shutdown flag is up
-    while(1){
+    while(!shutDownFlag){
 	if(tcpMessageQ.size() <= 0){
 	    pthread_mutex_lock(&tcpMessageQLock);
 	    pthread_cond_wait(&tcpMessageQCV, &tcpMessageQLock);
+        if(shutDownFlag){
+            printf("TCP write thread exiting...\n");
+            pthread_mutex_unlock(&tcpMessageQLock);
+            pthread_exit(0);
+        }
 	    mes = tcpMessageQ.front() ;
 	    tcpMessageQ.pop_front() ;
 	    pthread_mutex_unlock(&tcpMessageQLock) ;
@@ -108,8 +116,9 @@ void *TCPwriteThread(void *args){
 	}
 
 	int numBytes = (int)write(sockfd, mes.packet, (int)mes.len) ;
-	if(numBytes != (int)mes.len){
+	if(numBytes != (int)mes.len || shutDownFlag){
 	    fprintf(stderr, "TCP write error\n") ;
+        pthread_exit(0);
 	}
     }
 
@@ -142,14 +151,12 @@ void pushMessageInUDPq(uint64_t sequenceNum, uint32_t size, unsigned char *buffe
     udpMessage mes ;
     mes.sequenceNum = sequenceNum;
     mes.data_len = size;
-    //mes.buffer = (unsigned char *)malloc(size) ;
     memcpy(mes.buffer, buffer, size) ;
     // Acquire the tcp write thread lock
     pthread_mutex_lock(&udpMessageQLock[myId]) ;
     // push the unsigned char in Q
     udpMessageQ[myId].push_back(mes) ;
     // Signal the write thread to wake up
-    //pthread_cond_broadcast(&udpMessageQCV) ;
     pthread_cond_signal(&udpMessageQCV[myId]) ;
     // release the lock
     pthread_mutex_unlock(&udpMessageQLock[myId]) ;
@@ -162,8 +169,33 @@ udpMessage getUDPpacketFromData(uint64_t sequenceNum, uint32_t size, unsigned ch
 
 	mes.sequenceNum = sequenceNum;
 	mes.data_len = size;
-    //mes.buffer = (unsigned char *)malloc(size) ;
 	memcpy(mes.buffer, buffer, size) ;
 
 return mes;
+}
+
+
+
+//Final shutdown function
+
+void shutDown(){
+
+int res;
+    shutDownFlag = true;
+    for(list<int >::iterator it = listOfSockfd.begin();it!=listOfSockfd.end();it++){
+        //close(*it);
+        shutdown(*it, SHUT_RDWR);
+        printf("Closed one socket....%d\n", *it);
+    }
+    pthread_mutex_lock(&tcpMessageQLock);
+    pthread_cond_signal(&tcpMessageQCV);
+    pthread_mutex_unlock(&tcpMessageQLock);
+
+   /* for(list<pthread_t>::iterator it = listOfThreads.begin();it!=listOfThreads.end();it++){
+        res = pthread_cancel(*it);
+        if(res == -1)
+            printf("Error in Pthread_Cancel...\n");
+        //pthread_kill(*it, SIGUSR1);
+    }*/
+    printf("Canceled all the thread....shutdown of client\n");
 }

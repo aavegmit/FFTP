@@ -57,11 +57,11 @@ void *prepareBlockThread(void *args){
         else{
             //READ from mmap
             getDataFromFile(sequenceNum, fileData, &size);
+            
+            //skipped compression
 
             //creating a packet from fileData
             mes = getUDPpacketFromData(sequenceNum, size, fileData);
-
-            //skipped compression
 
             //write to cache skipped
             writeToCache(sequenceNum, mes, RANDOM_PACKET);	
