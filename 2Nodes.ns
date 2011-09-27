@@ -1,0 +1,15 @@
+# This is a simple ns script. Comments start with #.
+set ns [new Simulator]
+source tb_compat.tcl
+
+set nodeServer [$ns node]
+set nodeClient [$ns node]
+
+set link0 [$ns duplex-link $nodeClient $nodeServer 1Mb 25ms DropTail]
+
+#Load OS image on nodes
+tb-set-node-os $nodeServer FBSD62-STD
+tb-set-node-os $nodeClient FBSD62-STD
+
+# Go!
+$ns run                                 
