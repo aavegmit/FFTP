@@ -129,7 +129,7 @@ void *WriteToFileThread(void *args){
 	    printf("Last packet received....\n") ;
 	}
 	if (lastPacketReceived)
-	    if (udpMessageQ.empty())
+	    if (udpMessageClientQ.empty())
 		if (isBitVectorSet(bitV))
 		    break ;
 
