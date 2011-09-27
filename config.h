@@ -13,12 +13,13 @@
 // Maximum size of the MAP (virtual memory concept as suggested by TEO)
 
 #define TCP_PORT "78471"
-#define MAXDATASIZE 1450
+#define MAXDATASIZE 16000
 #define TCP_BACKLOG 10
 #define TCP_HEADER_SIZE 5
-#define NUM_UDP_CONNECTION 10
+#define NUM_UDP_CONNECTION 1
+#define NUM_SERVER_CONNECTION 1
 #define RANDOM_PACKET 0
 #define LOST_PACKET 1
-#define MAX_CACHE_SIZE 100
-#define ACK_SENDING_RATIO 100 
-#define CRITICAL_ACK_SENDING_GAP 100
+#define MAX_CACHE_SIZE 1000
+#define ACK_SENDING_RATIO 100
+#define CRITICAL_ACK_SENDING_GAP 1000

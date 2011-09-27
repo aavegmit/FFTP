@@ -189,7 +189,7 @@ void handleACKlist(unsigned char *buffer, uint32_t data_len){
     uint64_t seq_num, last_seq_num, current_seq_num ;
     memcpy(&seq_num, buffer, 8) ;
     memcpy(&last_seq_num, buffer + 8, 8) ;
-//    printf("Server receives a ACK list from the client...%llu - %llu\n", seq_num, last_seq_num) ;
+    printf("Server receives a ACK list from the client...%llu - %llu\n", seq_num, last_seq_num) ;
     ++noOfAckRecd ;
     for(uint64_t i = (seq_num%8) ; i <= last_seq_num - (seq_num / 8)*8 ; ++i){
         current_seq_num = (seq_num/8)*8 + i ;
@@ -213,6 +213,8 @@ void sendAckRequest(int64_t seq_num, uint64_t last_seq_num){
 //    printf("Sending Ack request %d - %d\n", seq_num, last_seq_num) ;
     ++noOfAckSent ;
     unsigned char *buffer = (unsigned char *)malloc(16) ;
+    if (last_seq_num > seq_num + 10400)
+        last_seq_num = seq_num + 10400 ;
     memcpy(buffer, &seq_num, 8) ;
     memcpy(buffer+8, &last_seq_num, 8);
     pushMessageInTCPq(0x2a, buffer, 16);

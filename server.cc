@@ -44,6 +44,7 @@ void *prepareBlockThread(void *args){
 
         pthread_mutex_lock(&sequenceNumberListLock);
         while(sequenceNumberList.size() == 0){
+            printf("Going on wait...\n");
 	    sendAckRequest(uptoPacketSent, lastSeqNumForAck) ;
             pthread_cond_wait(&sequenceNumberListCV, &sequenceNumberListLock);
         }

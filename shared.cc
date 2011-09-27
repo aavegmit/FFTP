@@ -79,7 +79,8 @@ void *TCPreadThread(void *args){
 
 	numbytes = (int)read(sockfd, buffer, data_len) ;
 	if (numbytes != (int)data_len || shutDownFlag){
-	    fprintf(stderr, "Error in buffer\n") ; 
+	    //fprintf(stderr, "Error in buffer\n") ; 
+        //printf("Shutdownflag = %d, numbytes = %d, data_len = %d\n",shutDownFlag, numbytes, (int)data_len);
 	    pthread_exit(0);
 	}
 
