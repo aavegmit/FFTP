@@ -140,7 +140,7 @@ void handleAckRequest(unsigned char *buffer, uint32_t data_len){
     int part_bv_len = (last_seq_num - seq_num)/8 + 17 ;
     unsigned char *part_bv = (unsigned char *)malloc(part_bv_len) ;
     if(last_seq_num != objParam.noOfSeq - 1)
-	usleep(10) ;
+	usleep(100) ;
     getBitVector(bitV, seq_num, last_seq_num, part_bv+16) ;
     memcpy(part_bv, &seq_num, 8) ;
     memcpy(part_bv+8, &last_seq_num, 8) ;

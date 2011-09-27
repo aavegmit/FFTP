@@ -198,6 +198,10 @@ void handleACKlist(unsigned char *buffer, uint32_t data_len){
             removeFromUDPPacketCache(current_seq_num) ;
 	    if (current_seq_num == uptoPacketSent + 1)
 		uptoPacketSent = current_seq_num ;
+	    if(uptoPacketSent == objParam.noOfSeq - 1){
+		displayStats() ;
+		shutDownFlag = true ;
+	    }
         }
         else{
             writeToCache(current_seq_num, getUDPpacketFromSeqNum(current_seq_num), LOST_PACKET ) ;

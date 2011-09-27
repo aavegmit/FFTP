@@ -1,6 +1,7 @@
 #include "server.h"
 
 //extern variable declared in server.h
+long udpSendWaitCount[NUM_UDP_CONNECTION] ;
 
 void *UDPserverThread(void *){
 
@@ -68,12 +69,14 @@ void *UDPwriteThread(void *temp){
 
     struct udpSocketData *udpSocketDataObj = (struct udpSocketData *)temp;
     int myId = udpSocketDataObj->myId;
+    udpSendWaitCount[myId] = 0 ;
     udpMessage mes;
     int n;
     uint64_t counter = 0;
     while(1){
         pthread_mutex_lock(&udpMessageQLock[myId]);
         while(udpMessageQ[myId].empty()){
+	    ++udpSendWaitCount[myId];
             pthread_cond_wait(&udpMessageQCV[myId], &udpMessageQLock[myId]);
         }
 

@@ -39,14 +39,15 @@ void *prepareBlockThread(void *args){
 
     //loadFileToMMap();
     //populateSequenceNumberList();
-    while(1){
+    while(!shutDownFlag){
 
         pthread_mutex_lock(&sequenceNumberListLock);
         while(sequenceNumberList.size() == 0){
-            printf("Going on wait...\n");
 	    sendAckRequest(uptoPacketSent, lastSeqNumForAck) ;
             pthread_cond_wait(&sequenceNumberListCV, &sequenceNumberListLock);
-        }
+	    if(shutDownFlag)
+		pthread_exit(0) ;
+	}
         sequenceNum = sequenceNumberList.front();
         sequenceNumberList.pop_front();
         pthread_mutex_unlock(&sequenceNumberListLock);
@@ -63,7 +64,6 @@ void *prepareBlockThread(void *args){
 
         //first check in cache
         if(inUDPpacketCache(sequenceNum)){
-//            printf("Found packet in cache...\n");
             pthread_mutex_lock(&udpPacketCacheLock);
             mes = udpPacketCache[sequenceNum];
             memcpy(fileData, mes.buffer, mes.data_len);
@@ -116,8 +116,20 @@ bool shouldSendAck(long numPacketsSent){
     else if(numPacketsSent == objParam.noOfSeq)
 	return true;
     else{
-	if((numPacketsSent - objParam.noOfSeq) % CRITICAL_ACK_SENDING_GAP == 0)
+	if((numPacketsSent - objParam.noOfSeq) % CRITICAL_ACK_SENDING_GAP == 0){
+	    printf("yes pappy\n") ;
 	    return true;
+	}
     }
     return false;
+}
+
+
+void displayStats(){
+    printf("Displaying stats..\n") ;
+    printf("#Total transmissions %ld\n", noOfPacketsSent ) ;
+    printf("#Udp server Wait count\n") ;
+    for(int i = 0 ; i < NUM_UDP_CONNECTION ; ++i){
+	printf("\tUdp server %d - %ld\n",i, udpSendWaitCount[i]) ; 
+    }
 }

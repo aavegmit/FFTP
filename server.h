@@ -38,7 +38,7 @@ void handleFileName(unsigned char *, uint32_t) ;
 
 // Push the sequence number and the data
 void pushBlockInUDPWrite() ;
-//void pushMessageInTCPq(uint8_t, unsigned char *, uint32_t) ;
+void displayStats();
 
 void sendAckRequest(int64_t, uint64_t) ;
 udpMessage getUDPpacketFromSeqNum(uint64_t) ;
@@ -46,4 +46,5 @@ bool shouldSendAck(long) ;
 extern long lastSeqNumForAck ;
 extern long noOfAckSent ;
 extern long noOfAckRecd ;
+extern long udpSendWaitCount[NUM_UDP_CONNECTION] ;
 #endif
