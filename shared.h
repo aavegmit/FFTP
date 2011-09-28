@@ -67,7 +67,6 @@ extern pthread_mutex_t packetSentLock ;
 extern int udpPortList[20];
 extern unsigned char clientName[255];
 
-extern uint64_t seq_num_count;
 
 extern bool shutDownFlag ;
 extern list<pthread_t > listOfThreads;

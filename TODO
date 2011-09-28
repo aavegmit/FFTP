@@ -1,5 +1,11 @@
-Have the shutdown flags setup
-[A] Integration
-[R] Find a compression algo
-[R] Implement compression algo
 Have ~ in the filenames convert to /home/username - if possible
+
+Noticed a one-two sec delay after WriteToFile thread exits. Try reducing that
+
+Duplicate packets still showing up. Should be close to zero
+
+Diff in file...This is due to the new logic introduced to terminate client write thread...packetRcvd reaches the total number of seq, even when all the packets are not recvd...check the writeBitvector method..
+
+put a gettimeofday around getPacketFromseq numb function in prepareBlock thread and analyse it for diff packet size
+
+put a gettimeofday around handleAckList

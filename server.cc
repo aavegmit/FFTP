@@ -43,7 +43,9 @@ void *prepareBlockThread(void *args){
 
         pthread_mutex_lock(&sequenceNumberListLock);
         while(sequenceNumberList.size() == 0){
-	    sendAckRequest(uptoPacketSent, lastSeqNumForAck) ;
+//	    if(noOfAckSent == noOfAckRecd){
+		sendAckRequest(uptoPacketSent, lastSeqNumForAck) ;
+//	    }
             pthread_cond_wait(&sequenceNumberListCV, &sequenceNumberListLock);
 	    if(shutDownFlag)
 		pthread_exit(0) ;

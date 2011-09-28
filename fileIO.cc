@@ -13,6 +13,7 @@ param objParam;
 bool lastPacketReceived ;
 unsigned char *bitV;
 map<long, bool> toBeSend;
+long packetsRcvd;
 
 
 
@@ -92,15 +93,15 @@ void getDataFromFile(uint64_t sequenceNum, unsigned char blockData[], uint32_t *
     long int i = 0;
     if(fileStat.st_size - (off_t)sequenceNum*MAXDATASIZE < MAXDATASIZE){
         for(i = 0;i<(int)(fileStat.st_size - (off_t)sequenceNum*MAXDATASIZE);i++){
-            blockData[i] = fileMap[(off_t)(sequenceNum*MAXDATASIZE+i)];
-            *size =(uint32_t)( fileStat.st_size - (off_t)sequenceNum*MAXDATASIZE);
-        }
+	    blockData[i] = fileMap[(off_t)(sequenceNum*MAXDATASIZE+i)];
+	}
+	*size =(uint32_t)( fileStat.st_size - (off_t)sequenceNum*MAXDATASIZE);
     }
     else{
-        for(i = 0;i<MAXDATASIZE;i++){
-            blockData[i] = fileMap[(off_t)(sequenceNum*MAXDATASIZE+i)];
-            *size = MAXDATASIZE;
-        }
+	for(i = 0;i<MAXDATASIZE;i++){
+	    blockData[i] = fileMap[(off_t)(sequenceNum*MAXDATASIZE+i)];
+	}
+	*size = MAXDATASIZE;
     }
 }
 
@@ -115,7 +116,7 @@ void *WriteToFileThread(void *args){
     while(1){
 	pthread_mutex_lock(&udpMessageClientQLock);
 	if(udpMessageClientQ.empty()){
-//            printf("Nothing in message Queue, going on wait at client side\n");
+	    ++count1 ;
             pthread_cond_wait(&udpMessageClientQCV, &udpMessageClientQLock);
         }
 
@@ -127,20 +128,26 @@ void *WriteToFileThread(void *args){
             mapToFile[mes.sequenceNum*MAXDATASIZE+i] = mes.buffer[i];
         }
 	// Check for the bitvector- termination
-	if(mes.sequenceNum == objParam.noOfSeq - 1){
-	    lastPacketReceived = true ;
-	    printf("Last packet received....\n") ;
-	}
-	if (lastPacketReceived)
-	    if (udpMessageClientQ.empty())
-		if (isBitVectorSet(bitV))
-		    break ;
+//	if(mes.sequenceNum == objParam.noOfSeq - 1){
+//	    lastPacketReceived = true ;
+//	    printf("Last packet received....\n") ;
+//	}
+//	if (lastPacketReceived)
+//	    if (udpMessageClientQ.empty())
+//		if (isBitVectorSet(bitV))
+//		    break ;
 
+	if(udpMessageClientQ.empty() && packetsRcvd == objParam.noOfSeq){
+	    printf("All packet received....\n") ;
+	    break ;
+	}
+	
         memset(mes.buffer, '\0', MAXDATASIZE);
     }
     printf("WriteToFile thread exiting at client...\n");
     unloadMMapForFile(fd);
-    printf("Retransmitted Packets count %d\n", dropPacketCount) ;
+    printf("Duplicate Packets count %d\n", dropPacketCount) ;
+    printf("Write to file thread wait count %d\n", count1) ;
     shutDown();
     exit(0) ;
 }

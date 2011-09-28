@@ -1,7 +1,5 @@
 #include "bitvector.h"
 
-uint64_t seq_num_count = 10000 ;
-
 // Indexed from 0
 // Read a bit from the array
 unsigned char readBit(unsigned char *str, uint64_t location){

@@ -40,12 +40,12 @@ int main(int argc, char **argv){
 	pthread_t tcpConnectionThread;
 	res = pthread_create(&tcpConnectionThread, NULL, TCPconnectionThread, &rv); 
 	if( res != 0){
-		fprintf(stderr, "TCP Connection thread creation failed\n") ;
-		exit(EXIT_FAILURE) ;
+	    fprintf(stderr, "TCP Connection thread creation failed\n") ;
+	    exit(EXIT_FAILURE) ;
 	}
 
 	pthread_join(udpConnectionThread, NULL);
-    pthread_join(tcpConnectionThread, NULL);
+	pthread_join(tcpConnectionThread, NULL);
 	printf("Client Exiting.....\n");
 }
 

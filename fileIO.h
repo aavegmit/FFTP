@@ -60,6 +60,7 @@ extern list<uint64_t > sequenceNumberList;
 extern unsigned char *mapToFile;
 extern bool lastPacketReceived ;
 extern unsigned char *bitV ;
+extern long packetsRcvd;
 void printMMapToFile();
 ///loads the file to mmap 'fileMap'
 void loadFileToMMap();

@@ -37,6 +37,7 @@ void init(){
     if (res != 0){
 	fprintf(stderr, "CV init failed\n") ;
     }
+    packetsRcvd = 0 ;
 }
 
 void initUDP(){

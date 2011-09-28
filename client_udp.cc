@@ -1,5 +1,4 @@
 #include "client.h"
-int count2 ;
 // This thread is invoked from the client main function
 // after command line parsing. It includes setting up a 
 // UDP connection with the UDP server
@@ -61,8 +60,6 @@ void *UDPreadThread(void *temp){
     struct sockaddr_in from;
     struct udpSocketData *udpSocketDataObj = (struct udpSocketData *)temp;
     int fromlen = 0, n;
-    int count1 = 0 ;
-    count2= 0;
     dropPacketCount = 0 ;
 
     fromlen = sizeof(struct sockaddr_in);
@@ -83,10 +80,11 @@ void *UDPreadThread(void *temp){
 	    udpMessageClientQ.push_back(mes) ;
 	    // Signal the write thread to wake up
 	    pthread_cond_signal(&udpMessageClientQCV) ;
+	    writeBit(bitV, mes.sequenceNum, 0x01) ;
+	    ++packetsRcvd ;
 	    // release the lock
 	    pthread_mutex_unlock(&udpMessageClientQLock) ;
 	    // Set the bit vector
-	    writeBit(bitV, mes.sequenceNum, 0x01) ;
 	}
 	else{
 	    ++dropPacketCount;
