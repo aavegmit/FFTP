@@ -2,7 +2,6 @@
 
 long noOfPacketsSent;
 long uptoPacketSent;
-long lastSeqNumForAck;
 long noOfAckSent;
 long noOfAckRecd;
 
@@ -11,7 +10,6 @@ int main(int argc, char **argv){
     int rv = 0;
     noOfPacketsSent = 0 ;
     uptoPacketSent = -1 ;
-    lastSeqNumForAck = 0 ;
     noOfAckSent = 0 ;
     noOfAckRecd = 0 ;
 
@@ -37,6 +35,7 @@ void *prepareBlockThread(void *args){
     bool alreadySet = false;
     udpMessage mes;
     memset(fileData, '\0',MAXDATASIZE+1);
+    long lastSeqNumForAck = 0;
 
     printf("PrepareThread...%d, %llu\n", m.myId, m.startSeqNum);
     while(!shutDownFlag){
@@ -48,7 +47,7 @@ void *prepareBlockThread(void *args){
             }
             else{
                 if(noOfAckSent == noOfAckRecd){
-                    sendAckRequest(uptoPacketSent, lastSeqNumForAck) ;
+                    sendAckRequest(uptoPacketSent, m.startSeqNum) ;
                 }
                 pthread_cond_wait(&sequenceNumberListCV[m.myId], &sequenceNumberListLock[m.myId]);
             }
@@ -64,13 +63,6 @@ void *prepareBlockThread(void *args){
         pthread_mutex_unlock(&sequenceNumberListLock[m.myId]);
     //    	printf("%d out of seq list\n", sequenceNum) ;
 
-        // Increase the number of packets for ACK handling
-        pthread_mutex_lock(&packetSentLock) ;
-        ++noOfPacketsSent ;
-        if(shouldSendAck(noOfPacketsSent)){
-            sendAckRequest(uptoPacketSent, lastSeqNumForAck) ;
-        }
-        pthread_mutex_unlock(&packetSentLock) ;
 
         //first check in cache
         //        if(inUDPpacketCache(sequenceNum)){
@@ -93,8 +85,13 @@ void *prepareBlockThread(void *args){
         //        }
 
         pushMessageInUDPq(sequenceNum, size, fileData, m.myId);
-        if(lastSeqNumForAck < sequenceNum)
-            lastSeqNumForAck = sequenceNum ;
+        // Increase the number of packets for ACK handling
+        pthread_mutex_lock(&packetSentLock) ;
+        ++noOfPacketsSent ;
+        if(shouldSendAck(noOfPacketsSent)){
+            sendAckRequest(uptoPacketSent, m.startSeqNum) ;
+        }
+        pthread_mutex_unlock(&packetSentLock) ;
 
         memset(fileData, '\0',MAXDATASIZE+1);
         alreadySet = false;

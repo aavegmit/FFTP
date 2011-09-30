@@ -9,3 +9,5 @@ Diff in file...This is due to the new logic introduced to terminate client write
 put a gettimeofday around getPacketFromseq numb function in prepareBlock thread and analyse it for diff packet size
 
 put a gettimeofday around handleAckList
+
+Not working on deter
