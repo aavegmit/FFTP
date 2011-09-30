@@ -237,7 +237,7 @@ void handleACKlist(unsigned char *buffer, uint32_t data_len){
 void sendAckRequest(int64_t seq_num, uint64_t last_seq_num){
     if(seq_num == -1)
 	seq_num = 0 ;
-//    printf("Sending Ack request %d - %d\n", seq_num, last_seq_num) ;
+    printf("Sending Ack request %d - %d\n", seq_num, last_seq_num) ;
     ++noOfAckSent ;
     unsigned char *buffer = (unsigned char *)malloc(16) ;
     if (last_seq_num > seq_num + 10400)

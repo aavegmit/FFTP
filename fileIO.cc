@@ -116,24 +116,32 @@ void getDataFromFile(uint64_t sequenceNum, unsigned char blockData[], uint32_t *
 void *WriteToFileThread(void *args){
 
     int count1 = 0 ;
-    udpMessage mes;
     int fd = loadMMapForFile((unsigned char *)objParam.localFilePath.c_str());
-    memset(mes.buffer, '\0', MAXDATASIZE);
+    unsigned char tempBuf[MAXDATASIZE] ;
+    memset(tempBuf, '\0', MAXDATASIZE) ;
 
     while(1){
+	udpMessage mes;
 	pthread_mutex_lock(&udpMessageClientQLock);
 	if(udpMessageClientQ.empty()){
 	    ++count1 ;
-            pthread_cond_wait(&udpMessageClientQCV, &udpMessageClientQLock);
-        }
+	    pthread_cond_wait(&udpMessageClientQCV, &udpMessageClientQLock);
+	}
 
-        mes = udpMessageClientQ.front();
-        udpMessageClientQ.pop_front();
-        pthread_mutex_unlock(&udpMessageClientQLock);
+	mes = udpMessageClientQ.front();
+	udpMessageClientQ.pop_front();
+	pthread_mutex_unlock(&udpMessageClientQLock);
 
+//	if(memcmp(&mes.buffer[3201], tempBuf, MAXDATASIZE-3201) == 0){
+//	    printf("%d is screwed\n", mes.sequenceNum) ;
+//	}
+
+
+	
         for(int i = 0; i < mes.data_len; i++){
             mapToFile[mes.sequenceNum*MAXDATASIZE+i] = mes.buffer[i];
         }
+//	printf("Writing to file %d\n", mes.sequenceNum) ;
 	// Check for the bitvector- termination
 	if(mes.sequenceNum == objParam.noOfSeq - 1){
 	    lastPacketReceived = true ;
@@ -145,14 +153,14 @@ void *WriteToFileThread(void *args){
 		    break ;
 
 	if(udpMessageClientQ.empty() && packetsRcvd == objParam.noOfSeq){
-	    printf("All packet received....\n") ;
+	    printf("All packet received....%d\n", isBitVectorSet(bitV)) ;
 	    break ;
 	}
 	
-        memset(mes.buffer, '\0', MAXDATASIZE);
+    //    memset(mes.buffer, '\0', MAXDATASIZE);
     }
-    printf("WriteToFile thread exiting at client...\n");
     unloadMMapForFile(fd);
+    printf("WriteToFile thread exiting at client...\n");
     printf("Duplicate Packets count %d\n", dropPacketCount) ;
     printf("Write to file thread wait count %d\n", count1) ;
     shutDown();

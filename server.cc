@@ -72,7 +72,6 @@ void *prepareBlockThread(void *args){
         }
         pthread_mutex_unlock(&packetSentLock) ;
 
-
         //first check in cache
         //        if(inUDPpacketCache(sequenceNum)){
         //            pthread_mutex_lock(&udpPacketCacheLock);

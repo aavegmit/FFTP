@@ -56,7 +56,6 @@ void *UDPconnectionThread(void *){
 // bitvector
 void *UDPreadThread(void *temp){
 
-    udpMessage mes;
     struct sockaddr_in from;
     struct udpSocketData *udpSocketDataObj = (struct udpSocketData *)temp;
     int fromlen = 0, n;
@@ -65,6 +64,7 @@ void *UDPreadThread(void *temp){
     fromlen = sizeof(struct sockaddr_in);
 
     while (!shutDownFlag){
+    udpMessage mes;
 
 	n = recvfrom(udpSocketDataObj->sockfd,&mes,sizeof(mes),0,(struct sockaddr *)&from,(socklen_t *)&fromlen);
 	if (n < 0 || shutDownFlag){
@@ -72,7 +72,7 @@ void *UDPreadThread(void *temp){
 	    if(shutDownFlag)
 		pthread_exit(0);
 	}
-	//        printf("Packet %d received by %d\n",mes.sequenceNum, udpSocketDataObj->sockfd);
+//	        printf("Packet %d - %d received by %d \n",mes.sequenceNum,mes.data_len, udpSocketDataObj->sockfd);
 
 	if (readBit(bitV, mes.sequenceNum) == 0x00){
 	    pthread_mutex_lock(&udpMessageClientQLock) ;
@@ -81,10 +81,10 @@ void *UDPreadThread(void *temp){
 	    // Signal the write thread to wake up
 	    pthread_cond_signal(&udpMessageClientQCV) ;
 	    writeBit(bitV, mes.sequenceNum, 0x01) ;
-	    ++packetsRcvd ;
 	    // release the lock
 	    pthread_mutex_unlock(&udpMessageClientQLock) ;
 	    // Set the bit vector
+	    ++packetsRcvd ;
 	}
 	else{
 	    ++dropPacketCount;
