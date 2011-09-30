@@ -68,7 +68,7 @@ void *UDPreadThread(void *temp){
 
 	n = recvfrom(udpSocketDataObj->sockfd,&mes,sizeof(mes),0,(struct sockaddr *)&from,(socklen_t *)&fromlen);
 	if (n < 0 || shutDownFlag){
-	    printf("Error: print on recvfrom");
+//	    printf("Error: print on recvfrom");
 	    if(shutDownFlag)
 		pthread_exit(0);
 	}
