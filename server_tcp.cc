@@ -162,14 +162,33 @@ void handleFileName(unsigned char *buffer, uint32_t data_len){
 
     //	Thread writes the data to UDP write thread's list
     loadFileToMMap();
-    populateSequenceNumberList();
+    //populateSequenceNumberList();
     int temp[NUM_UDP_CONNECTION];
+    uint64_t q = (fileInfoObj.fileStat.st_size/MAXDATASIZE);
+    uint64_t r = (fileInfoObj.fileStat.st_size%MAXDATASIZE);
+
+    if(r > 0)
+        q+=1;
+    printf("Q IS: %llu\n", q);
+   
+    r = q%NUM_UDP_CONNECTION;
+    q = q/NUM_UDP_CONNECTION;
+    
     for(int i = 0;i<NUM_UDP_CONNECTION;i++){
 
+        myPrepareData m;
         pthread_t PrepareBlockThread;
-        temp[i] = i;
-        printf("PrepareBlockThread is creating: %d\n", temp[i]);
-        pthread_create(&PrepareBlockThread, NULL, prepareBlockThread, &temp[i]);
+        //temp[i] = i;
+        m.myId = i;
+        m.startSeqNum = q*i;
+        if(i == NUM_UDP_CONNECTION-1)
+            m.endSeqNum = (q*(i+1) - 1) + r;
+        else
+            m.endSeqNum = (q*(i+1) - 1) ;
+
+        printf("PrepareBlockThread is creating: %d, startSeq: %llu, endSeqNum: %llu\n", m.myId, m.startSeqNum, m.endSeqNum);
+        
+        pthread_create(&PrepareBlockThread, NULL, prepareBlockThread, &m);
     }
     //Thread - Start UDP Server
     pthread_t udpServerThread;

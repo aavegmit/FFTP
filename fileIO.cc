@@ -4,9 +4,9 @@
 
 unsigned char *fileMap;  /* mmapped array of int's */
 struct stat fileStat;
-list<uint64_t > sequenceNumberList;
-pthread_mutex_t sequenceNumberListLock;
-pthread_cond_t sequenceNumberListCV;
+list<uint64_t > sequenceNumberList[NUM_UDP_CONNECTION];
+pthread_mutex_t sequenceNumberListLock[NUM_UDP_CONNECTION];
+pthread_cond_t sequenceNumberListCV[NUM_UDP_CONNECTION];
 unsigned char *mapToFile;
 struct fileInfo fileInfoObj;
 param objParam;
@@ -53,7 +53,7 @@ void unloadFileMap(){
 }
 
 //populates the sequence number for file
-void populateSequenceNumberList(){
+/*void populateSequenceNumberList(){
 
     pthread_mutex_lock(&sequenceNumberListLock);
     uint64_t q = fileInfoObj.fileStat.st_size/MAXDATASIZE;
@@ -70,13 +70,20 @@ void populateSequenceNumberList(){
 	toBeSend[q] = true ;
     }
     pthread_mutex_unlock(&sequenceNumberListLock);
-}
+}*/
 
 void pushSequenceNumberInList(uint64_t sequenceNum){
-    pthread_mutex_lock(&sequenceNumberListLock);
-    sequenceNumberList.push_front(sequenceNum);
-    pthread_cond_signal(&sequenceNumberListCV);
-    pthread_mutex_unlock(&sequenceNumberListLock);
+    static int myTurn = 0;
+    if(myTurn == NUM_UDP_CONNECTION){
+        myTurn = 0;
+    }
+
+    pthread_mutex_lock(&sequenceNumberListLock[myTurn]);
+    sequenceNumberList[myTurn].push_front(sequenceNum);
+    pthread_cond_signal(&sequenceNumberListCV[myTurn]);
+    myTurn++;
+    pthread_mutex_unlock(&sequenceNumberListLock[myTurn-1]);
+
 }
 void printMMapToFile(){
 
@@ -128,14 +135,14 @@ void *WriteToFileThread(void *args){
             mapToFile[mes.sequenceNum*MAXDATASIZE+i] = mes.buffer[i];
         }
 	// Check for the bitvector- termination
-//	if(mes.sequenceNum == objParam.noOfSeq - 1){
-//	    lastPacketReceived = true ;
-//	    printf("Last packet received....\n") ;
-//	}
-//	if (lastPacketReceived)
-//	    if (udpMessageClientQ.empty())
-//		if (isBitVectorSet(bitV))
-//		    break ;
+	if(mes.sequenceNum == objParam.noOfSeq - 1){
+	    lastPacketReceived = true ;
+	    printf("Last packet received....\n") ;
+	}
+	if (lastPacketReceived)
+	    if (udpMessageClientQ.empty())
+		if (isBitVectorSet(bitV))
+		    break ;
 
 	if(udpMessageClientQ.empty() && packetsRcvd == objParam.noOfSeq){
 	    printf("All packet received....\n") ;

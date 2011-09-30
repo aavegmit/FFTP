@@ -29,66 +29,76 @@ int main(int argc, char **argv){
 // and puts them in the server UDP write queue
 void *prepareBlockThread(void *args){
 
-    int myId = *((int *)args);
+    myPrepareData m = *((myPrepareData *)args);
     //int myId = temp;
     uint64_t sequenceNum;
     uint32_t size = 0;
     unsigned char *fileData = (unsigned char *)malloc(MAXDATASIZE+1);
+    bool alreadySet = false;
     udpMessage mes;
     memset(fileData, '\0',MAXDATASIZE+1);
 
-    //loadFileToMMap();
-    //populateSequenceNumberList();
+    printf("PrepareThread...%d, %llu\n", m.myId, m.startSeqNum);
     while(!shutDownFlag){
+        pthread_mutex_lock(&sequenceNumberListLock[m.myId]);
+        if(sequenceNumberList[m.myId].size() == 0){
+            if(m.startSeqNum <= m.endSeqNum){
+                sequenceNum = m.startSeqNum++;
+                alreadySet = true;
+            }
+            else{
+                if(noOfAckSent == noOfAckRecd){
+                    sendAckRequest(uptoPacketSent, lastSeqNumForAck) ;
+                }
+                pthread_cond_wait(&sequenceNumberListCV[m.myId], &sequenceNumberListLock[m.myId]);
+            }
+            if(shutDownFlag){
+                pthread_mutex_unlock(&sequenceNumberListLock[m.myId]);
+                pthread_exit(0) ;
+            }
+        }
+        if(!alreadySet){
+            sequenceNum = sequenceNumberList[m.myId].front();
+            sequenceNumberList[m.myId].pop_front();
+        }
+        pthread_mutex_unlock(&sequenceNumberListLock[m.myId]);
+    //    	printf("%d out of seq list\n", sequenceNum) ;
 
-        pthread_mutex_lock(&sequenceNumberListLock);
-        while(sequenceNumberList.size() == 0){
-//	    if(noOfAckSent == noOfAckRecd){
-		sendAckRequest(uptoPacketSent, lastSeqNumForAck) ;
-//	    }
-            pthread_cond_wait(&sequenceNumberListCV, &sequenceNumberListLock);
-	    if(shutDownFlag)
-		pthread_exit(0) ;
-	}
-        sequenceNum = sequenceNumberList.front();
-        sequenceNumberList.pop_front();
-        pthread_mutex_unlock(&sequenceNumberListLock);
-//	printf("%d out of seq list\n", sequenceNum) ;
+        // Increase the number of packets for ACK handling
+        pthread_mutex_lock(&packetSentLock) ;
+        ++noOfPacketsSent ;
+        if(shouldSendAck(noOfPacketsSent)){
+            sendAckRequest(uptoPacketSent, lastSeqNumForAck) ;
+        }
+        pthread_mutex_unlock(&packetSentLock) ;
 
-	// Increase the number of packets for ACK handling
-	pthread_mutex_lock(&packetSentLock) ;
-	++noOfPacketsSent ;
-	if(shouldSendAck(noOfPacketsSent)){
-	    sendAckRequest(uptoPacketSent, lastSeqNumForAck) ;
-	}
-	pthread_mutex_unlock(&packetSentLock) ;
-	
 
         //first check in cache
-        if(inUDPpacketCache(sequenceNum)){
-            pthread_mutex_lock(&udpPacketCacheLock);
-            mes = udpPacketCache[sequenceNum];
-            memcpy(fileData, mes.buffer, mes.data_len);
-            pthread_mutex_unlock(&udpPacketCacheLock);
-        }
-        else{
-            //READ from mmap
-            getDataFromFile(sequenceNum, fileData, &size);
-            
-            //skipped compression
+        //        if(inUDPpacketCache(sequenceNum)){
+        //            pthread_mutex_lock(&udpPacketCacheLock);
+        //            mes = udpPacketCache[sequenceNum];
+        //            memcpy(fileData, mes.buffer, mes.data_len);
+        //            pthread_mutex_unlock(&udpPacketCacheLock);
+        //        }
+        //        else{
+        //READ from mmap
+        getDataFromFile(sequenceNum, fileData, &size);
 
-            //creating a packet from fileData
-            mes = getUDPpacketFromData(sequenceNum, size, fileData);
+        //skipped compression
 
-            //write to cache skipped
-            writeToCache(sequenceNum, mes, RANDOM_PACKET);	
-        }
+        //creating a packet from fileData
+        mes = getUDPpacketFromData(sequenceNum, size, fileData);
 
-        pushMessageInUDPq(sequenceNum, size, fileData, myId);
-	if(lastSeqNumForAck < sequenceNum)
-	    lastSeqNumForAck = sequenceNum ;
+        //write to cache skipped
+        //            writeToCache(sequenceNum, mes, RANDOM_PACKET);	
+        //        }
+
+        pushMessageInUDPq(sequenceNum, size, fileData, m.myId);
+        if(lastSeqNumForAck < sequenceNum)
+            lastSeqNumForAck = sequenceNum ;
 
         memset(fileData, '\0',MAXDATASIZE+1);
+        alreadySet = false;
     }
 
     //NEED TO UNLOAD MAP SOMEWHERE
@@ -108,23 +118,22 @@ udpMessage getUDPpacketFromSeqNum(uint64_t sequenceNum){
     return mes;
 }
 
-bool shouldSendAck(long numPacketsSent){
-    if(noOfAckSent != noOfAckRecd)
-	return false;
-    if(numPacketsSent < objParam.noOfSeq){
-	if (numPacketsSent % (objParam.noOfSeq / ACK_SENDING_RATIO) == 0)
-	    return true;
+    bool shouldSendAck(long numPacketsSent){
+        if(noOfAckSent != noOfAckRecd)
+            return false;
+        if(numPacketsSent < objParam.noOfSeq){
+            if (numPacketsSent % (objParam.noOfSeq / ACK_SENDING_RATIO) == 0)
+                return true;
+        }
+        else if(numPacketsSent == objParam.noOfSeq)
+            return true;
+        else{
+            if((numPacketsSent - objParam.noOfSeq) % CRITICAL_ACK_SENDING_GAP == 0){
+                return true;
+            }
+        }
+        return false;
     }
-    else if(numPacketsSent == objParam.noOfSeq)
-	return true;
-    else{
-	if((numPacketsSent - objParam.noOfSeq) % CRITICAL_ACK_SENDING_GAP == 0){
-	    printf("yes pappy\n") ;
-	    return true;
-	}
-    }
-    return false;
-}
 
 
 void displayStats(){
@@ -132,6 +141,6 @@ void displayStats(){
     printf("#Total transmissions %ld\n", noOfPacketsSent ) ;
     printf("#Udp server Wait count\n") ;
     for(int i = 0 ; i < NUM_UDP_CONNECTION ; ++i){
-	printf("\tUdp server %d - %ld\n",i, udpSendWaitCount[i]) ; 
+        printf("\tUdp server %d - %ld\n",i, udpSendWaitCount[i]) ; 
     }
 }

@@ -54,9 +54,9 @@ extern map<long, bool> toBeSend;
 
 extern unsigned char *fileMap;
 extern struct stat fileStat;
-extern pthread_mutex_t sequenceNumberListLock;
-extern pthread_cond_t sequenceNumberListCV;
-extern list<uint64_t > sequenceNumberList;
+extern pthread_mutex_t sequenceNumberListLock[NUM_UDP_CONNECTION];
+extern pthread_cond_t sequenceNumberListCV[NUM_UDP_CONNECTION];
+extern list<uint64_t > sequenceNumberList[NUM_UDP_CONNECTION];
 extern unsigned char *mapToFile;
 extern bool lastPacketReceived ;
 extern unsigned char *bitV ;

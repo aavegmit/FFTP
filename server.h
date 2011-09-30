@@ -23,6 +23,12 @@ struct udpSocketData{
     int myId;
 };
 
+typedef struct prepareThreadData{
+    int myId;
+    uint64_t startSeqNum;
+    uint64_t endSeqNum;
+} myPrepareData;
+
 extern long uptoPacketSent ;
 
 void *TCPserverThread(void *);
