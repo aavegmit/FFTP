@@ -5,14 +5,14 @@ pthread_mutex_t udpPacketCacheLock;
 list<uint64_t > cachedUDPRandomPacketList;
 
 bool inUDPpacketCache(uint64_t sequenceNum){
-    map<uint64_t, udpMessage>::iterator it;
+    //map<uint64_t, udpMessage>::iterator it;
 
-    it = udpPacketCache.find(sequenceNum);
-    if(it == udpPacketCache.end()){
-	return false;
+    //it = udpPacketCache.find(sequenceNum);
+    if(udpPacketCache.find(sequenceNum) == udpPacketCache.end()){
+	    return false;
     }
     else
-	return true;
+    	return true;
 }
 
 void addToCachedUDPRandomPacketList(uint64_t sequenceNum){

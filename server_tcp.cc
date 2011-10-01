@@ -134,6 +134,9 @@ void processReceivedTCPmessage(uint8_t message_type, unsigned char *buffer, uint
     else if(message_type == 0x2b){
         handleACKlist(buffer, data_len) ;
     }
+    else if(message_type == 0xff){
+        startUDPServerThreads();
+    }
     else{
         fprintf(stderr, "TCP message not recognized\n") ;
     }
@@ -170,36 +173,24 @@ void handleFileName(unsigned char *buffer, uint32_t data_len){
     if(r > 0)
         q+=1;
     printf("Q IS: %llu\n", q);
-   
+
     r = q%NUM_UDP_CONNECTION;
     q = q/NUM_UDP_CONNECTION;
-    
+
     for(int i = 0;i<NUM_UDP_CONNECTION;i++){
 
-        myPrepareData m;
+        myPrepareData *m = (myPrepareData *)malloc(sizeof(myPrepareData));
         pthread_t PrepareBlockThread;
         //temp[i] = i;
-        m.myId = i;
-        m.startSeqNum = q*i;
+        m->myId = i;
+        m->startSeqNum = q*i;
         if(i == NUM_UDP_CONNECTION-1)
-            m.endSeqNum = (q*(i+1) - 1) + r;
+            m->endSeqNum = (q*(i+1) - 1) + r;
         else
-            m.endSeqNum = (q*(i+1) - 1) ;
+            m->endSeqNum = (q*(i+1) - 1) ;
 
-
-	///// ITS a bug, remove it
-	sleep(1) ;
-
-        printf("PrepareBlockThread is creating: %d, startSeq: %llu, endSeqNum: %llu\n", m.myId, m.startSeqNum, m.endSeqNum);
-        
-        pthread_create(&PrepareBlockThread, NULL, prepareBlockThread, &m);
-    }
-    //Thread - Start UDP Server
-    pthread_t udpServerThread;
-    int res = pthread_create(&udpServerThread, NULL, UDPserverThread, &rv);
-    if( res != 0){
-        fprintf(stderr, "TCP read thread creation failed\n") ;
-        exit(EXIT_FAILURE) ;
+        printf("PrepareBlockThread is creating: %d, startSeq: %llu, endSeqNum: %llu\n", m->myId, m->startSeqNum, m->endSeqNum);
+        pthread_create(&PrepareBlockThread, NULL, prepareBlockThread, (void *)m);
     }
 }
 
@@ -212,15 +203,15 @@ void handleACKlist(unsigned char *buffer, uint32_t data_len){
     uint64_t seq_num, last_seq_num, current_seq_num ;
     memcpy(&seq_num, buffer, 8) ;
     memcpy(&last_seq_num, buffer + 8, 8) ;
-//    printf("Server receives a ACK list from the client...%llu - %llu\n", seq_num, last_seq_num) ;
+    //    printf("Server receives a ACK list from the client...%llu - %llu\n", seq_num, last_seq_num) ;
     uint64_t seq_num_mod = (seq_num/8)*8 ;
     for(uint64_t i = (seq_num%8) ; i <= last_seq_num - seq_num_mod ; ++i){
         current_seq_num = seq_num_mod + i ;
         if(readBit(buffer+16, i) == 0x01){
-//            printf("Packet received - %ld\n", current_seq_num) ;
+            //            printf("Packet received - %ld\n", current_seq_num) ;
             removeFromUDPPacketCache(current_seq_num) ;
-	    if (current_seq_num == uptoPacketSent + 1)
-		uptoPacketSent = current_seq_num ;
+            if (current_seq_num == uptoPacketSent + 1)
+                uptoPacketSent = current_seq_num ;
         }
         else{
 //	    if(!toBeSend[current_seq_num]){
@@ -233,22 +224,35 @@ void handleACKlist(unsigned char *buffer, uint32_t data_len){
         }
     }
     if(uptoPacketSent == objParam.noOfSeq - 1){
-	displayStats() ;
-	shutDownFlag = true ;
+        displayStats() ;
+        shutDownFlag = true ;
     }
     ++noOfAckRecd ;
 }
 
-void sendAckRequest(int64_t seq_num, uint64_t last_seq_num){
-    if(seq_num == -1)
-	seq_num = 0 ;
-    printf("Sending Ack request %d - %d\n", seq_num, last_seq_num) ;
-    ++noOfAckSent ;
-    unsigned char *buffer = (unsigned char *)malloc(16) ;
-    if (last_seq_num > seq_num + 10400)
-        last_seq_num = seq_num + 10400 ;
-    memcpy(buffer, &seq_num, 8) ;
-    memcpy(buffer+8, &last_seq_num, 8);
-    pushMessageInTCPq(0x2a, buffer, 16);
-    free(buffer) ;
+void startUDPServerThreads(){
+
+int rv = 0;
+    printf("Starting UDP Threads...\n");
+    //Thread - Start UDP Server
+    pthread_t udpServerThread;
+    int res = pthread_create(&udpServerThread, NULL, UDPserverThread, &rv);
+    if( res != 0){
+        fprintf(stderr, "TCP read thread creation failed\n") ;
+        exit(EXIT_FAILURE) ;
+    }
 }
+
+    void sendAckRequest(int64_t seq_num, uint64_t last_seq_num){
+        if(seq_num == -1)
+            seq_num = 0 ;
+        //    printf("Sending Ack request %d - %d\n", seq_num, last_seq_num) ;
+        ++noOfAckSent ;
+        unsigned char *buffer = (unsigned char *)malloc(16) ;
+        if (last_seq_num > seq_num + 10400)
+            last_seq_num = seq_num + 10400 ;
+        memcpy(buffer, &seq_num, 8) ;
+        memcpy(buffer+8, &last_seq_num, 8);
+        pushMessageInTCPq(0x2a, buffer, 16);
+        free(buffer) ;
+    }

@@ -1,5 +1,6 @@
 #include "fileIO.h"
 #include "shared.h"
+#include <sys/time.h>
 
 
 unsigned char *fileMap;  /* mmapped array of int's */

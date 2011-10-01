@@ -1,4 +1,5 @@
 #include "server.h"
+#include <sys/time.h>
 
 long noOfPacketsSent;
 long uptoPacketSent;
@@ -27,7 +28,8 @@ int main(int argc, char **argv){
 // and puts them in the server UDP write queue
 void *prepareBlockThread(void *args){
 
-    myPrepareData m = *((myPrepareData *)args);
+    myPrepareData *m = ((myPrepareData *)args);
+    //int myId = temp;
     uint64_t sequenceNum;
     uint32_t size = 0;
     unsigned char *fileData = (unsigned char *)malloc(MAXDATASIZE+1);
@@ -36,60 +38,65 @@ void *prepareBlockThread(void *args){
     memset(fileData, '\0',MAXDATASIZE+1);
     long lastSeqNumForAck = 0;
 
-    printf("PrepareThread...%d, %llu\n", m.myId, m.startSeqNum);
+    printf("PrepareThread...%d, %llu\n", m->myId, m->startSeqNum);
     while(!shutDownFlag){
-        pthread_mutex_lock(&sequenceNumberListLock[m.myId]);
-        if(sequenceNumberList[m.myId].size() == 0){
-            if(m.startSeqNum < m.endSeqNum){
-                sequenceNum = m.startSeqNum++;
+        pthread_mutex_lock(&sequenceNumberListLock[m->myId]);
+        if(sequenceNumberList[m->myId].size() == 0){
+            if(m->startSeqNum < m->endSeqNum){
+                sequenceNum = m->startSeqNum++;
                 alreadySet = true;
             }
             else{
                 if(noOfAckSent == noOfAckRecd){
-                    sendAckRequest(uptoPacketSent, m.startSeqNum) ;
+                    sendAckRequest(uptoPacketSent, m->startSeqNum) ;
                 }
-                pthread_cond_wait(&sequenceNumberListCV[m.myId], &sequenceNumberListLock[m.myId]);
+                pthread_cond_wait(&sequenceNumberListCV[m->myId], &sequenceNumberListLock[m->myId]);
             }
             if(shutDownFlag){
-                pthread_mutex_unlock(&sequenceNumberListLock[m.myId]);
+                pthread_mutex_unlock(&sequenceNumberListLock[m->myId]);
                 pthread_exit(0) ;
             }
         }
         if(!alreadySet){
-            sequenceNum = sequenceNumberList[m.myId].front();
-            sequenceNumberList[m.myId].pop_front();
-	    toBeSend.erase(sequenceNum) ;
+            sequenceNum = sequenceNumberList[m->myId].front();
+            sequenceNumberList[m->myId].pop_front();
+            toBeSend.erase(sequenceNum) ;
         }
-        pthread_mutex_unlock(&sequenceNumberListLock[m.myId]);
-    //    	printf("%d out of seq list\n", sequenceNum) ;
+        pthread_mutex_unlock(&sequenceNumberListLock[m->myId]);
+        //    	printf("%d out of seq list\n", sequenceNum) ;
 
 
         //first check in cache
-        //        if(inUDPpacketCache(sequenceNum)){
-        //            pthread_mutex_lock(&udpPacketCacheLock);
-        //            mes = udpPacketCache[sequenceNum];
-        //            memcpy(fileData, mes.buffer, mes.data_len);
-        //            pthread_mutex_unlock(&udpPacketCacheLock);
-        //        }
-        //        else{
-        //READ from mmap
-        getDataFromFile(sequenceNum, fileData, &size);
+        if(inUDPpacketCache(sequenceNum)){
+            //struct timeval tv1, tv2;
+            //gettimeofday(&tv1, NULL);
+            pthread_mutex_lock(&udpPacketCacheLock);
+            mes = udpPacketCache[sequenceNum];
+            memcpy(fileData, mes.buffer, mes.data_len);
+            pthread_mutex_unlock(&udpPacketCacheLock);
+            //gettimeofday(&tv2, NULL);
+            //printf("TIME IS....tv1: %llu, tv2: %llu, %d\n", tv1.tv_sec, tv2.tv_sec, sequenceNum);
+        }
+        else{
+            //READ from mmap
+            getDataFromFile(sequenceNum, fileData, &size);
 
-        //skipped compression
+            //skipped compression
 
-        //creating a packet from fileData
-        mes = getUDPpacketFromData(sequenceNum, size, fileData);
+            //creating a packet from fileData
+            mes = getUDPpacketFromData(sequenceNum, size, fileData);
 
-        //write to cache skipped
-        //            writeToCache(sequenceNum, mes, RANDOM_PACKET);	
-        //        }
+            //write to cache skipped
+            //printf("Writing in Cache: %d\n", sequenceNum);
+            writeToCache(sequenceNum, mes, RANDOM_PACKET);	
+        }
 
-        pushMessageInUDPq(sequenceNum, size, fileData, m.myId);
+        pushMessageInUDPq(sequenceNum, size, fileData, m->myId);
         // Increase the number of packets for ACK handling
         pthread_mutex_lock(&packetSentLock) ;
         ++noOfPacketsSent ;
         if(shouldSendAck(noOfPacketsSent)){
-            sendAckRequest(uptoPacketSent, m.startSeqNum) ;
+            sendAckRequest(uptoPacketSent, m->startSeqNum) ;
         }
         pthread_mutex_unlock(&packetSentLock) ;
 
@@ -108,7 +115,7 @@ udpMessage getUDPpacketFromSeqNum(uint64_t sequenceNum){
     //READ from mmap
     getDataFromFile(sequenceNum, fileData, &size);
     if(size > MAXDATASIZE)
-	printf("Yups, size me chodh hai..%d on seq %d\n", size, sequenceNum) ;
+        printf("Yups, size me chodh hai..%d on seq %d\n", size, sequenceNum) ;
 
     //creating a packet from fileData
     udpMessage mes = getUDPpacketFromData(sequenceNum, size, fileData);

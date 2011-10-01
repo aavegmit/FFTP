@@ -118,6 +118,9 @@ void handleFileInfo(unsigned char *buffer, uint32_t data_len){
     bitV = (unsigned char *)malloc(objParam.noOfSeq/8+1) ;
     memset(bitV, 0x00, objParam.noOfSeq/8 + 1) ;
 
+    //Pushing the ready message in TCP Q
+    pushMessageInTCPq(0xff,NULL,0);
+
     pthread_t writeToFileThread;
     int res = pthread_create(&writeToFileThread, NULL, WriteToFileThread, &rv); 
     if( res != 0){
