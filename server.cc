@@ -28,7 +28,6 @@ int main(int argc, char **argv){
 void *prepareBlockThread(void *args){
 
     myPrepareData m = *((myPrepareData *)args);
-    //int myId = temp;
     uint64_t sequenceNum;
     uint32_t size = 0;
     unsigned char *fileData = (unsigned char *)malloc(MAXDATASIZE+1);
@@ -41,7 +40,7 @@ void *prepareBlockThread(void *args){
     while(!shutDownFlag){
         pthread_mutex_lock(&sequenceNumberListLock[m.myId]);
         if(sequenceNumberList[m.myId].size() == 0){
-            if(m.startSeqNum <= m.endSeqNum){
+            if(m.startSeqNum < m.endSeqNum){
                 sequenceNum = m.startSeqNum++;
                 alreadySet = true;
             }
@@ -59,6 +58,7 @@ void *prepareBlockThread(void *args){
         if(!alreadySet){
             sequenceNum = sequenceNumberList[m.myId].front();
             sequenceNumberList[m.myId].pop_front();
+	    toBeSend.erase(sequenceNum) ;
         }
         pthread_mutex_unlock(&sequenceNumberListLock[m.myId]);
     //    	printf("%d out of seq list\n", sequenceNum) ;
@@ -107,6 +107,8 @@ udpMessage getUDPpacketFromSeqNum(uint64_t sequenceNum){
     unsigned char *fileData = (unsigned char *)malloc(MAXDATASIZE+1);
     //READ from mmap
     getDataFromFile(sequenceNum, fileData, &size);
+    if(size > MAXDATASIZE)
+	printf("Yups, size me chodh hai..%d on seq %d\n", size, sequenceNum) ;
 
     //creating a packet from fileData
     udpMessage mes = getUDPpacketFromData(sequenceNum, size, fileData);

@@ -50,7 +50,7 @@ typedef struct paramT{
 }param;
 
 extern param objParam;
-extern map<long, bool> toBeSend;
+extern map<uint64_t, bool> toBeSend;
 
 extern unsigned char *fileMap;
 extern struct stat fileStat;

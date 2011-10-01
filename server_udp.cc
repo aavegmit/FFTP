@@ -96,7 +96,6 @@ void *UDPwriteThread(void *temp){
 //            printf("ERROR writing to UDP socket\n");
 //	    pthread_exit(0) ;
 //        }
-	toBeSend[mes.sequenceNum] = false ;
     }
     return 0;
 }

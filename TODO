@@ -4,10 +4,22 @@ Noticed a one-two sec delay after WriteToFile thread exits. Try reducing that
 
 Duplicate packets still showing up. Should be close to zero
 
-Diff in file...This is due to the new logic introduced to terminate client write thread...packetRcvd reaches the total number of seq, even when all the packets are not recvd...check the writeBitvector method..
-
 put a gettimeofday around getPacketFromseq numb function in prepareBlock thread and analyse it for diff packet size
 
 put a gettimeofday around handleAckList
 
 Not working on deter
+
+BUG: Server udp write thread is now so quick that it starts sending packets, but the client is not ready...to have a new TCP message from client to the server notfiying the server that the client is now ready to receive data
+	Temp fix - Put a sleep where we start out prepare block threads
+
+Feature: Send a termination TCP message to the server indicating that the transfer is complete
+
+
+shot glasses
+nuts
+vodka
+beer
+water melon
+beer glasses
+wiskey

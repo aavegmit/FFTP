@@ -186,6 +186,10 @@ void handleFileName(unsigned char *buffer, uint32_t data_len){
         else
             m.endSeqNum = (q*(i+1) - 1) ;
 
+
+	///// ITS a bug, remove it
+	sleep(1) ;
+
         printf("PrepareBlockThread is creating: %d, startSeq: %llu, endSeqNum: %llu\n", m.myId, m.startSeqNum, m.endSeqNum);
         
         pthread_create(&PrepareBlockThread, NULL, prepareBlockThread, &m);
@@ -219,12 +223,13 @@ void handleACKlist(unsigned char *buffer, uint32_t data_len){
 		uptoPacketSent = current_seq_num ;
         }
         else{
-            writeToCache(current_seq_num, getUDPpacketFromSeqNum(current_seq_num), LOST_PACKET ) ;
-	    if(!toBeSend[current_seq_num]){
+//	    if(!toBeSend[current_seq_num]){
+	    if(toBeSend.find(current_seq_num) == toBeSend.end()){
+//		writeToCache(current_seq_num, getUDPpacketFromSeqNum(current_seq_num), LOST_PACKET ) ;
 		toBeSend[current_seq_num] = true ;
 		pushSequenceNumberInList(current_seq_num) ;
 	    }
-//            printf("Packet lost - %d\n", current_seq_num) ;
+	    //            printf("Packet lost - %d\n", current_seq_num) ;
         }
     }
     if(uptoPacketSent == objParam.noOfSeq - 1){
@@ -237,7 +242,7 @@ void handleACKlist(unsigned char *buffer, uint32_t data_len){
 void sendAckRequest(int64_t seq_num, uint64_t last_seq_num){
     if(seq_num == -1)
 	seq_num = 0 ;
-//    printf("Sending Ack request %d - %d\n", seq_num, last_seq_num) ;
+    printf("Sending Ack request %d - %d\n", seq_num, last_seq_num) ;
     ++noOfAckSent ;
     unsigned char *buffer = (unsigned char *)malloc(16) ;
     if (last_seq_num > seq_num + 10400)

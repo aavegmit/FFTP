@@ -75,12 +75,12 @@ void *UDPreadThread(void *temp){
 //	        printf("Packet %d - %d received by %d \n",mes.sequenceNum,mes.data_len, udpSocketDataObj->sockfd);
 
 	if (readBit(bitV, mes.sequenceNum) == 0x00){
+	    writeBit(bitV, mes.sequenceNum, 0x01) ;
 	    pthread_mutex_lock(&udpMessageClientQLock) ;
 	    // push the unsigned char in Q
 	    udpMessageClientQ.push_back(mes) ;
 	    // Signal the write thread to wake up
 	    pthread_cond_signal(&udpMessageClientQCV) ;
-	    writeBit(bitV, mes.sequenceNum, 0x01) ;
 	    // release the lock
 	    pthread_mutex_unlock(&udpMessageClientQLock) ;
 	    // Set the bit vector
@@ -88,6 +88,7 @@ void *UDPreadThread(void *temp){
 	}
 	else{
 	    ++dropPacketCount;
+	    printf("Duplicate %d\n", mes.sequenceNum) ;
 	}
     }
     close(udpSocketDataObj->sockfd);

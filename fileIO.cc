@@ -12,7 +12,7 @@ struct fileInfo fileInfoObj;
 param objParam;
 bool lastPacketReceived ;
 unsigned char *bitV;
-map<long, bool> toBeSend;
+map<uint64_t, bool> toBeSend;
 long packetsRcvd;
 
 
@@ -143,14 +143,14 @@ void *WriteToFileThread(void *args){
         }
 //	printf("Writing to file %d\n", mes.sequenceNum) ;
 	// Check for the bitvector- termination
-	if(mes.sequenceNum == objParam.noOfSeq - 1){
-	    lastPacketReceived = true ;
-	    printf("Last packet received....\n") ;
-	}
-	if (lastPacketReceived)
-	    if (udpMessageClientQ.empty())
-		if (isBitVectorSet(bitV))
-		    break ;
+//	if(mes.sequenceNum == objParam.noOfSeq - 1){
+//	    lastPacketReceived = true ;
+//	    printf("Last packet received....\n") ;
+//	}
+//	if (lastPacketReceived)
+//	    if (udpMessageClientQ.empty())
+//		if (isBitVectorSet(bitV))
+//		    break ;
 
 	if(udpMessageClientQ.empty() && packetsRcvd == objParam.noOfSeq){
 	    printf("All packet received....%d\n", isBitVectorSet(bitV)) ;
