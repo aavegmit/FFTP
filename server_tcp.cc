@@ -137,6 +137,11 @@ void processReceivedTCPmessage(uint8_t message_type, unsigned char *buffer, uint
     else if(message_type == 0xff){
         startUDPServerThreads();
     }
+    else if(message_type == 0xee){
+        displayStats();
+        printf("Server Ends here....\n");
+        exit(0);
+    }
     else{
         fprintf(stderr, "TCP message not recognized\n") ;
     }

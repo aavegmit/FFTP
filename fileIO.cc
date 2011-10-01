@@ -16,7 +16,6 @@ unsigned char *bitV;
 long packetsRcvd;
 unsigned char *toBeSendV ;
 
-
 //function to load file into global variable for MMAP...'fileMap'
 void loadFileToMMap(){
 
@@ -47,8 +46,8 @@ void loadFileToMMap(){
 void unloadFileMap(){
 
     if (munmap(fileMap, fileInfoObj.fileStat.st_size) == -1) {
-	perror("Error un-mmapping the file");
-	exit(EXIT_FAILURE);
+        perror("Error un-mmapping the file");
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -98,15 +97,15 @@ void getDataFromFile(uint64_t sequenceNum, unsigned char blockData[], uint32_t *
     long int i = 0;
     if(fileStat.st_size - (off_t)sequenceNum*MAXDATASIZE < MAXDATASIZE){
         for(i = 0;i<(int)(fileStat.st_size - (off_t)sequenceNum*MAXDATASIZE);i++){
-	    blockData[i] = fileMap[(off_t)(sequenceNum*MAXDATASIZE+i)];
-	}
-	*size =(uint32_t)( fileStat.st_size - (off_t)sequenceNum*MAXDATASIZE);
+            blockData[i] = fileMap[(off_t)(sequenceNum*MAXDATASIZE+i)];
+        }
+        *size =(uint32_t)( fileStat.st_size - (off_t)sequenceNum*MAXDATASIZE);
     }
     else{
-	for(i = 0;i<MAXDATASIZE;i++){
-	    blockData[i] = fileMap[(off_t)(sequenceNum*MAXDATASIZE+i)];
-	}
-	*size = MAXDATASIZE;
+        for(i = 0;i<MAXDATASIZE;i++){
+            blockData[i] = fileMap[(off_t)(sequenceNum*MAXDATASIZE+i)];
+        }
+        *size = MAXDATASIZE;
     }
 }
 
@@ -119,43 +118,44 @@ void *WriteToFileThread(void *args){
     memset(tempBuf, '\0', MAXDATASIZE) ;
 
     while(1){
-	udpMessage mes;
-	pthread_mutex_lock(&udpMessageClientQLock);
-	if(udpMessageClientQ.empty()){
-	    ++count1 ;
-	    pthread_cond_wait(&udpMessageClientQCV, &udpMessageClientQLock);
-	}
+        udpMessage mes;
+        pthread_mutex_lock(&udpMessageClientQLock);
+        if(udpMessageClientQ.empty()){
+            ++count1 ;
+            pthread_cond_wait(&udpMessageClientQCV, &udpMessageClientQLock);
+        }
 
-	mes = udpMessageClientQ.front();
-	udpMessageClientQ.pop_front();
-	pthread_mutex_unlock(&udpMessageClientQLock);
+        mes = udpMessageClientQ.front();
+        udpMessageClientQ.pop_front();
+        pthread_mutex_unlock(&udpMessageClientQLock);
 
-//	if(memcmp(&mes.buffer[3201], tempBuf, MAXDATASIZE-3201) == 0){
-//	    printf("%d is screwed\n", mes.sequenceNum) ;
-//	}
+        //	if(memcmp(&mes.buffer[3201], tempBuf, MAXDATASIZE-3201) == 0){
+        //	    printf("%d is screwed\n", mes.sequenceNum) ;
+        //	}
 
 
-	
+
         for(int i = 0; i < mes.data_len; i++){
             mapToFile[mes.sequenceNum*MAXDATASIZE+i] = mes.buffer[i];
         }
-//	printf("Writing to file %d\n", mes.sequenceNum) ;
-	// Check for the bitvector- termination
-//	if(mes.sequenceNum == objParam.noOfSeq - 1){
-//	    lastPacketReceived = true ;
-//	    printf("Last packet received....\n") ;
-//	}
-//	if (lastPacketReceived)
-//	    if (udpMessageClientQ.empty())
-//		if (isBitVectorSet(bitV))
-//		    break ;
+        //	printf("Writing to file %d\n", mes.sequenceNum) ;
+        // Check for the bitvector- termination
+        //	if(mes.sequenceNum == objParam.noOfSeq - 1){
+        //	    lastPacketReceived = true ;
+        //	    printf("Last packet received....\n") ;
+        //	}
+        //	if (lastPacketReceived)
+        //	    if (udpMessageClientQ.empty())
+        //		if (isBitVectorSet(bitV))
+        //		    break ;
 
-	if(udpMessageClientQ.empty() && packetsRcvd == objParam.noOfSeq){
-	    printf("All packet received....%d\n", isBitVectorSet(bitV)) ;
-	    break ;
-	}
-	
-    //    memset(mes.buffer, '\0', MAXDATASIZE);
+        if(udpMessageClientQ.empty() && packetsRcvd == objParam.noOfSeq){
+            printf("All packet received....%d\n", isBitVectorSet(bitV)) ;
+            pushMessageInTCPq(0xee, NULL, NULL);
+            break ;
+        }
+
+        //    memset(mes.buffer, '\0', MAXDATASIZE);
     }
     unloadMMapForFile(fd);
     printf("WriteToFile thread exiting at client...\n");
@@ -236,3 +236,4 @@ void unloadMMapForFile(int fd) {
      */
     close(fd);
 }
+

@@ -1,7 +1,5 @@
 #include "server.h"
 
-//extern variable declared in server.h
-long udpSendWaitCount[NUM_UDP_CONNECTION] ;
 
 void *UDPserverThread(void *){
 

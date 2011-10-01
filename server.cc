@@ -1,12 +1,6 @@
 #include "server.h"
 #include <sys/time.h>
 
-long noOfPacketsSent;
-long uptoPacketSent;
-long noOfAckSent;
-long noOfAckRecd;
-long noOfLossPackets ;
-
 int main(int argc, char **argv){
 
     int rv = 0;
@@ -71,14 +65,10 @@ void *prepareBlockThread(void *args){
 
         //first check in cache
         if(inUDPpacketCache(sequenceNum)){
-            //struct timeval tv1, tv2;
-            //gettimeofday(&tv1, NULL);
             pthread_mutex_lock(&udpPacketCacheLock);
             mes = udpPacketCache[sequenceNum];
             memcpy(fileData, mes.buffer, mes.data_len);
             pthread_mutex_unlock(&udpPacketCacheLock);
-            //gettimeofday(&tv2, NULL);
-            //printf("TIME IS....tv1: %llu, tv2: %llu, %d\n", tv1.tv_sec, tv2.tv_sec, sequenceNum);
         }
         else{
             //READ from mmap
@@ -99,7 +89,7 @@ void *prepareBlockThread(void *args){
         pthread_mutex_lock(&packetSentLock) ;
         ++noOfPacketsSent ;
         if(shouldSendAck(noOfPacketsSent)){
-            sendAckRequest(uptoPacketSent, m->startSeqNum) ;
+            sendAckRequest(uptoPacketSent, m->startSeqNum - 1) ;
         }
         pthread_mutex_unlock(&packetSentLock) ;
 
@@ -142,14 +132,3 @@ udpMessage getUDPpacketFromSeqNum(uint64_t sequenceNum){
         }
         return false;
     }
-
-
-void displayStats(){
-    printf("Displaying stats..\n") ;
-    printf("#Total transmissions %ld\n", noOfPacketsSent ) ;
-    printf("#Total packets lost %ld\n", noOfLossPackets) ;
-    printf("#Udp server Wait count\n") ;
-    for(int i = 0 ; i < NUM_UDP_CONNECTION ; ++i){
-        printf("\tUdp server %d - %ld\n",i, udpSendWaitCount[i]) ; 
-    }
-}

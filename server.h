@@ -50,9 +50,4 @@ void sendAckRequest(int64_t, uint64_t) ;
 udpMessage getUDPpacketFromSeqNum(uint64_t) ;
 bool shouldSendAck(long) ;
 void startUDPServerThreads();
-extern long lastSeqNumForAck ;
-extern long noOfAckSent ;
-extern long noOfAckRecd ;
-extern long noOfLossPackets;
-extern long udpSendWaitCount[NUM_UDP_CONNECTION] ;
 #endif
