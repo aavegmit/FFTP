@@ -53,5 +53,6 @@ void startUDPServerThreads();
 extern long lastSeqNumForAck ;
 extern long noOfAckSent ;
 extern long noOfAckRecd ;
+extern long noOfLossPackets;
 extern long udpSendWaitCount[NUM_UDP_CONNECTION] ;
 #endif

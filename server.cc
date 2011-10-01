@@ -5,6 +5,7 @@ long noOfPacketsSent;
 long uptoPacketSent;
 long noOfAckSent;
 long noOfAckRecd;
+long noOfLossPackets ;
 
 int main(int argc, char **argv){
 
@@ -13,6 +14,7 @@ int main(int argc, char **argv){
     uptoPacketSent = -1 ;
     noOfAckSent = 0 ;
     noOfAckRecd = 0 ;
+    noOfLossPackets = 0 ;
 
     init() ;
 
@@ -42,13 +44,13 @@ void *prepareBlockThread(void *args){
     while(!shutDownFlag){
         pthread_mutex_lock(&sequenceNumberListLock[m->myId]);
         if(sequenceNumberList[m->myId].size() == 0){
-            if(m->startSeqNum < m->endSeqNum){
+            if(m->startSeqNum <= m->endSeqNum){
                 sequenceNum = m->startSeqNum++;
                 alreadySet = true;
             }
             else{
                 if(noOfAckSent == noOfAckRecd){
-                    sendAckRequest(uptoPacketSent, m->startSeqNum) ;
+                    sendAckRequest(uptoPacketSent, m->startSeqNum - 1) ;
                 }
                 pthread_cond_wait(&sequenceNumberListCV[m->myId], &sequenceNumberListLock[m->myId]);
             }
@@ -60,7 +62,8 @@ void *prepareBlockThread(void *args){
         if(!alreadySet){
             sequenceNum = sequenceNumberList[m->myId].front();
             sequenceNumberList[m->myId].pop_front();
-            toBeSend.erase(sequenceNum) ;
+	    writeBit(toBeSendV, sequenceNum, 0x00) ;
+//            toBeSend.erase(sequenceNum) ;
         }
         pthread_mutex_unlock(&sequenceNumberListLock[m->myId]);
         //    	printf("%d out of seq list\n", sequenceNum) ;
@@ -144,6 +147,7 @@ udpMessage getUDPpacketFromSeqNum(uint64_t sequenceNum){
 void displayStats(){
     printf("Displaying stats..\n") ;
     printf("#Total transmissions %ld\n", noOfPacketsSent ) ;
+    printf("#Total packets lost %ld\n", noOfLossPackets) ;
     printf("#Udp server Wait count\n") ;
     for(int i = 0 ; i < NUM_UDP_CONNECTION ; ++i){
         printf("\tUdp server %d - %ld\n",i, udpSendWaitCount[i]) ; 

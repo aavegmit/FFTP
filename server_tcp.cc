@@ -173,6 +173,7 @@ void handleFileName(unsigned char *buffer, uint32_t data_len){
     if(r > 0)
         q+=1;
     printf("Q IS: %llu\n", q);
+    toBeSendV = (unsigned char *)malloc(q/8+1) ;
 
     r = q%NUM_UDP_CONNECTION;
     q = q/NUM_UDP_CONNECTION;
@@ -214,13 +215,18 @@ void handleACKlist(unsigned char *buffer, uint32_t data_len){
                 uptoPacketSent = current_seq_num ;
         }
         else{
-//	    if(!toBeSend[current_seq_num]){
-	    if(toBeSend.find(current_seq_num) == toBeSend.end()){
-//		writeToCache(current_seq_num, getUDPpacketFromSeqNum(current_seq_num), LOST_PACKET ) ;
-		toBeSend[current_seq_num] = true ;
+//	    if(toBeSend.find(current_seq_num) == toBeSend.end()){
+
+	    if(readBit(toBeSendV, current_seq_num) == 0x00){
+		writeToCache(current_seq_num, getUDPpacketFromSeqNum(current_seq_num), LOST_PACKET ) ;
+
+//	        printf("Packet lost - %d\n", current_seq_num) ;
+//		toBeSend[current_seq_num] = true ;
+
+		writeBit(toBeSendV, current_seq_num, 0x01) ;
 		pushSequenceNumberInList(current_seq_num) ;
+		++noOfLossPackets ;
 	    }
-	    //            printf("Packet lost - %d\n", current_seq_num) ;
         }
     }
     if(uptoPacketSent == objParam.noOfSeq - 1){
@@ -243,16 +249,16 @@ int rv = 0;
     }
 }
 
-    void sendAckRequest(int64_t seq_num, uint64_t last_seq_num){
-        if(seq_num == -1)
-            seq_num = 0 ;
-        //    printf("Sending Ack request %d - %d\n", seq_num, last_seq_num) ;
-        ++noOfAckSent ;
-        unsigned char *buffer = (unsigned char *)malloc(16) ;
-        if (last_seq_num > seq_num + 10400)
-            last_seq_num = seq_num + 10400 ;
-        memcpy(buffer, &seq_num, 8) ;
-        memcpy(buffer+8, &last_seq_num, 8);
-        pushMessageInTCPq(0x2a, buffer, 16);
-        free(buffer) ;
-    }
+void sendAckRequest(int64_t seq_num, uint64_t last_seq_num){
+    if(seq_num == -1)
+        seq_num = 0 ;
+    //    printf("Sending Ack request %d - %d\n", seq_num, last_seq_num) ;
+    ++noOfAckSent ;
+    unsigned char *buffer = (unsigned char *)malloc(16) ;
+    if (last_seq_num > seq_num + 10400)
+        last_seq_num = seq_num + 10400 ;
+    memcpy(buffer, &seq_num, 8) ;
+    memcpy(buffer+8, &last_seq_num, 8);
+    pushMessageInTCPq(0x2a, buffer, 16);
+    free(buffer) ;
+}

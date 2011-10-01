@@ -13,9 +13,8 @@ struct fileInfo fileInfoObj;
 param objParam;
 bool lastPacketReceived ;
 unsigned char *bitV;
-map<uint64_t, bool> toBeSend;
 long packetsRcvd;
-
+unsigned char *toBeSendV ;
 
 
 //function to load file into global variable for MMAP...'fileMap'
@@ -63,12 +62,10 @@ void unloadFileMap(){
     objParam.noOfSeq = q ;
     for(uint64_t i=0;i<q;i++){
         sequenceNumberList.push_back(i);
-	toBeSend[i] = true ;
     }
     if(r > 0){
         sequenceNumberList.push_back(q);
 	++objParam.noOfSeq ;
-	toBeSend[q] = true ;
     }
     pthread_mutex_unlock(&sequenceNumberListLock);
 }*/

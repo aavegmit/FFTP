@@ -50,7 +50,6 @@ typedef struct paramT{
 }param;
 
 extern param objParam;
-extern map<uint64_t, bool> toBeSend;
 
 extern unsigned char *fileMap;
 extern struct stat fileStat;
@@ -60,6 +59,7 @@ extern list<uint64_t > sequenceNumberList[NUM_UDP_CONNECTION];
 extern unsigned char *mapToFile;
 extern bool lastPacketReceived ;
 extern unsigned char *bitV ;
+extern unsigned char *toBeSendV ;
 extern long packetsRcvd;
 void printMMapToFile();
 ///loads the file to mmap 'fileMap'
