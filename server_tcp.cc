@@ -179,6 +179,7 @@ void handleFileName(unsigned char *buffer, uint32_t data_len){
         q+=1;
     printf("Q IS: %llu\n", q);
     toBeSendV = (unsigned char *)malloc(q/8+1) ;
+    objParam.noOfSeq = q ;
 
     r = q%NUM_UDP_CONNECTION;
     q = q/NUM_UDP_CONNECTION;
@@ -209,15 +210,16 @@ void handleACKlist(unsigned char *buffer, uint32_t data_len){
     uint64_t seq_num, last_seq_num, current_seq_num ;
     memcpy(&seq_num, buffer, 8) ;
     memcpy(&last_seq_num, buffer + 8, 8) ;
-    //    printf("Server receives a ACK list from the client...%llu - %llu\n", seq_num, last_seq_num) ;
+    int sender_num = seq_num * NUM_UDP_CONNECTION / (objParam.noOfSeq - 1) ;
+//        printf("Server receives a ACK list (%d) from the client...%llu - %llu\n", sender_num ,seq_num, last_seq_num) ;
     uint64_t seq_num_mod = (seq_num/8)*8 ;
     for(uint64_t i = (seq_num%8) ; i <= last_seq_num - seq_num_mod ; ++i){
         current_seq_num = seq_num_mod + i ;
         if(readBit(buffer+16, i) == 0x01){
             //            printf("Packet received - %ld\n", current_seq_num) ;
             removeFromUDPPacketCache(current_seq_num) ;
-            if (current_seq_num == uptoPacketSent + 1)
-                uptoPacketSent = current_seq_num ;
+            if (current_seq_num == uptoPacketSent[sender_num] + 1)
+                uptoPacketSent[sender_num] = current_seq_num ;
         }
         else{
 //	    if(toBeSend.find(current_seq_num) == toBeSend.end()){
@@ -234,11 +236,11 @@ void handleACKlist(unsigned char *buffer, uint32_t data_len){
 	    }
         }
     }
-    if(uptoPacketSent == objParam.noOfSeq - 1){
-        displayStats() ;
-        shutDownFlag = true ;
-    }
-    ++noOfAckRecd ;
+//    if(uptoPacketSent[sender_num] == objParam.noOfSeq - 1){
+//        displayStats() ;
+//        shutDownFlag = true ;
+//    }
+    ++noOfAckRecd[sender_num] ;
 }
 
 void startUDPServerThreads(){
@@ -257,8 +259,7 @@ int rv = 0;
 void sendAckRequest(int64_t seq_num, uint64_t last_seq_num){
     if(seq_num == -1)
         seq_num = 0 ;
-    //    printf("Sending Ack request %d - %d\n", seq_num, last_seq_num) ;
-    ++noOfAckSent ;
+  //  printf("Sending Ack request %d - %d\n", seq_num, last_seq_num) ;
     unsigned char *buffer = (unsigned char *)malloc(16) ;
     if (last_seq_num > seq_num + 10400)
         last_seq_num = seq_num + 10400 ;

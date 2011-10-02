@@ -88,7 +88,7 @@ void *UDPreadThread(void *temp){
 	}
 	else{
 	    ++dropPacketCount;
-	    printf("Duplicate %d\n", mes.sequenceNum) ;
+//	    printf("Duplicate %d\n", mes.sequenceNum) ;
 	}
     }
     close(udpSocketDataObj->sockfd);

@@ -29,7 +29,6 @@ typedef struct prepareThreadData{
     uint64_t endSeqNum;
 } myPrepareData;
 
-extern long uptoPacketSent ;
 
 void *TCPserverThread(void *);
 void *UDPserverThread(void *);
@@ -48,6 +47,6 @@ void displayStats();
 
 void sendAckRequest(int64_t, uint64_t) ;
 udpMessage getUDPpacketFromSeqNum(uint64_t) ;
-bool shouldSendAck(long) ;
+bool shouldSendAck(long, int) ;
 void startUDPServerThreads();
 #endif

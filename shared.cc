@@ -18,10 +18,10 @@ list<pthread_t > listOfThreads;
 list<int > listOfSockfd;
 uint64_t dropPacketCount;
 
-long noOfPacketsSent;
-long uptoPacketSent;
-long noOfAckSent;
-long noOfAckRecd;
+long noOfPacketsSent[NUM_UDP_CONNECTION];
+long uptoPacketSent[NUM_UDP_CONNECTION];
+long noOfAckSent[NUM_UDP_CONNECTION];
+long noOfAckRecd[NUM_UDP_CONNECTION];
 long noOfLossPackets ;
 long udpSendWaitCount[NUM_UDP_CONNECTION];
 

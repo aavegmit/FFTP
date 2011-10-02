@@ -62,9 +62,6 @@ extern unsigned char *bitV ;
 extern unsigned char *toBeSendV ;
 extern long packetsRcvd;
 
-extern long lastSeqNumForAck ;
-extern long noOfAckSent ;
-extern long noOfAckRecd ;
 extern long udpSendWaitCount[NUM_UDP_CONNECTION] ;
 
 void displayStats();

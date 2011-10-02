@@ -10,16 +10,4 @@ put a gettimeofday around handleAckList
 
 Not working on deter
 
-BUG: Server udp write thread is now so quick that it starts sending packets, but the client is not ready...to have a new TCP message from client to the server notfiying the server that the client is now ready to receive data
-	Temp fix - Put a sleep where we start out prepare block threads
-
-Feature: Send a termination TCP message to the server indicating that the transfer is complete
-
-
-shot glasses
-nuts
-vodka
-beer
-water melon
-beer glasses
-wiskey
+deadlock because all prepblock thread goes on wait

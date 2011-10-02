@@ -49,10 +49,10 @@ void displayStats();
 //For shutdown purposes
 void shutDown();
 
-extern long noOfPacketsSent;
-extern long uptoPacketSent;
-extern long noOfAckSent;
-extern long noOfAckRecd;
+extern long noOfPacketsSent[NUM_UDP_CONNECTION];
+extern long uptoPacketSent[NUM_UDP_CONNECTION] ;
+extern long noOfAckSent[NUM_UDP_CONNECTION] ;
+extern long noOfAckRecd[NUM_UDP_CONNECTION] ;
 extern long noOfLossPackets ;
 extern long udpSendWaitCount[NUM_UDP_CONNECTION];
 
