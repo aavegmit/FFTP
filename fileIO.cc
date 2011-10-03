@@ -4,7 +4,7 @@
 
 
 unsigned char *fileMap;  /* mmapped array of int's */
-struct stat fileStat;
+//struct stat fileStat;
 list<uint64_t > sequenceNumberList[NUM_UDP_CONNECTION];
 pthread_mutex_t sequenceNumberListLock[NUM_UDP_CONNECTION];
 pthread_cond_t sequenceNumberListCV[NUM_UDP_CONNECTION];
@@ -27,7 +27,7 @@ void loadFileToMMap(){
         exit(EXIT_FAILURE);
     }
 
-    if (fstat (fd, &fileStat) == -1) {
+    if (fstat (fd, &fileInfoObj.fileStat) == -1) {
         perror ("fstat");
         exit(EXIT_FAILURE);
     }
@@ -106,21 +106,21 @@ void pushSequenceNumberListInList(list<uint64_t> sequenceNumList){
 void printMMapToFile(){
 
     FILE *f = fopen("temp", "wb");
-    while(fileStat.st_size > 0){
-        fwrite(&fileMap[fileStat.st_size],1,1,f);
-        fileStat.st_size--;
+    while(fileInfoObj.fileStat.st_size > 0){
+        fwrite(&fileMap[fileInfoObj.fileStat.st_size],1,1,f);
+        fileInfoObj.fileStat.st_size--;
     }
     fclose(f);
 }
 
 void getDataFromFile(uint64_t sequenceNum, unsigned char blockData[], uint32_t *size){
 
-    long int i = 0;
-    if(fileStat.st_size - (off_t)sequenceNum*MAXDATASIZE < MAXDATASIZE){
-        for(i = 0;i<(int)(fileStat.st_size - (off_t)sequenceNum*MAXDATASIZE);i++){
+    off_t i = 0;
+    if(fileInfoObj.fileStat.st_size - (off_t)sequenceNum*MAXDATASIZE < MAXDATASIZE){
+        for(i = 0;i<(fileInfoObj.fileStat.st_size - (off_t)sequenceNum*MAXDATASIZE);i++){
             blockData[i] = fileMap[(off_t)(sequenceNum*MAXDATASIZE+i)];
         }
-        *size =(uint32_t)( fileStat.st_size - (off_t)sequenceNum*MAXDATASIZE);
+        *size =(uint32_t)( fileInfoObj.fileStat.st_size - (off_t)sequenceNum*MAXDATASIZE);
     }
     else{
         for(i = 0;i<MAXDATASIZE;i++){

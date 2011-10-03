@@ -30,7 +30,8 @@ void *prepareBlockThread(void *args){
     bool alreadySet = false;
     udpMessage mes;
     memset(fileData, '\0',MAXDATASIZE+1);
-    uptoPacketSent[m->myId] = m->startSeqNum;
+    uptoPacketSent[m->myId] = m->startSeqNum - 1;
+    uint64_t startSeqForAck = m->startSeqNum - 1;
     noOfAckSent[m->myId] = 0 ;
     noOfAckRecd[m->myId] = 0 ;
     if (m->myId ==  0)
@@ -48,10 +49,16 @@ void *prepareBlockThread(void *args){
             }
 	    else{
 		if(noOfAckSent[m->myId] == noOfAckRecd[m->myId]){
-		    sendAckRequest(uptoPacketSent[m->myId], m->startSeqNum - 1) ;
+		    if(uptoPacketSent[m->myId] == m->endSeqNum){
+			printf("%d is done\n", m->myId) ;
+		    }
+		    if(uptoPacketSent[m->myId] == startSeqForAck )
+			sendAckRequest(uptoPacketSent[m->myId]+1, m->startSeqNum - 1) ;
+		    else
+			sendAckRequest(uptoPacketSent[m->myId], m->startSeqNum - 1) ;
 		    ++noOfAckSent[m->myId] ;
 		}
-		printf("Going on wait\n") ;
+//		printf("Going on wait %d\n", m->myId) ;
                 pthread_cond_wait(&sequenceNumberListCV[m->myId], &sequenceNumberListLock[m->myId]);
             }
             if(shutDownFlag){
@@ -74,6 +81,8 @@ void *prepareBlockThread(void *args){
             pthread_mutex_lock(&udpPacketCacheLock);
             mes = udpPacketCache[sequenceNum];
             memcpy(fileData, mes.buffer, mes.data_len);
+	    printf("Reading from cache - %d %d\n", mes.sequenceNum, mes.data_len) ;
+	    size = mes.data_len ;
             pthread_mutex_unlock(&udpPacketCacheLock);
         }
         else{
@@ -83,7 +92,7 @@ void *prepareBlockThread(void *args){
             //skipped compression
 
             //creating a packet from fileData
-            mes = getUDPpacketFromData(sequenceNum, size, fileData);
+//            mes = getUDPpacketFromData(sequenceNum, size, fileData);
 
             //write to cache skipped
             //printf("Writing in Cache: %d\n", sequenceNum);
@@ -95,7 +104,11 @@ void *prepareBlockThread(void *args){
         pthread_mutex_lock(&packetSentLock) ;
 	++noOfPacketsSent[m->myId] ;
         if(shouldSendAck(noOfPacketsSent[m->myId], m->myId)){
-	    sendAckRequest(uptoPacketSent[m->myId], m->startSeqNum - 1) ;
+	    if(uptoPacketSent[m->myId] == startSeqForAck )
+		sendAckRequest(uptoPacketSent[m->myId]+1, m->startSeqNum - 1) ;
+	    else
+		sendAckRequest(uptoPacketSent[m->myId], m->startSeqNum - 1) ;
+	    
 	    ++noOfAckSent[m->myId] ;
         }
         pthread_mutex_unlock(&packetSentLock) ;

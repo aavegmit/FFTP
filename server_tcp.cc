@@ -220,10 +220,10 @@ void handleACKlist(unsigned char *buffer, uint32_t data_len){
     uint64_t seq_num_mod = (seq_num/8)*8 ;
     for(uint64_t i = (seq_num%8) ; i <= last_seq_num - seq_num_mod ; ++i){
         current_seq_num = seq_num_mod + i ;
-        if(readBit(buffer+16, i) == 0x01){
-    //                    printf("Packet received - %ld\n", current_seq_num) ;
-            removeFromUDPPacketCache(current_seq_num) ;
-            if (current_seq_num == uptoPacketSent[sender_num] + 1)
+	if(readBit(buffer+16, i) == 0x01){
+	    printf("Packet received - %ld, upto %ld\n", current_seq_num, uptoPacketSent[sender_num]) ;
+	    removeFromUDPPacketCache(current_seq_num) ;
+	    if (current_seq_num == uptoPacketSent[sender_num] + 1)
                 uptoPacketSent[sender_num] = current_seq_num ;
         }
         else{
@@ -232,7 +232,7 @@ void handleACKlist(unsigned char *buffer, uint32_t data_len){
 	    if(readBit(toBeSendV, current_seq_num) == 0x00){
 		writeToCache(current_seq_num, getUDPpacketFromSeqNum(current_seq_num), LOST_PACKET ) ;
 
-//	        printf("Packet lost - %d\n", current_seq_num) ;
+	        printf("Packet lost - %d\n", current_seq_num) ;
 //		toBeSend[current_seq_num] = true ;
 
 		writeBit(toBeSendV, current_seq_num, 0x01) ;

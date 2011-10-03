@@ -62,6 +62,8 @@ void *UDPreadThread(void *temp){
     dropPacketCount = 0 ;
 
     fromlen = sizeof(struct sockaddr_in);
+    unsigned char tempBuf[16] ;
+    memset(tempBuf, '\0', 16) ;
 
     while (!shutDownFlag){
     udpMessage mes;
@@ -74,8 +76,13 @@ void *UDPreadThread(void *temp){
 	}
 
 	if (readBit(bitV, mes.sequenceNum) == 0x00){
-//	        printf("Packet %d - %d received by %d \n",mes.sequenceNum,mes.data_len, udpSocketDataObj->sockfd);
+	        printf("Packet %d - %d received by %d \n",mes.sequenceNum,mes.data_len, udpSocketDataObj->sockfd);
 	    writeBit(bitV, mes.sequenceNum, 0x01) ;
+//	    for(int i = 0 ; i < mes.data_len - 26 ; i=i+16){
+//		if(memcmp(&mes.buffer[i], tempBuf, 16) == 0){
+//		    printf("Screwed\n") ;
+//		}
+//	    }
 	    pthread_mutex_lock(&udpMessageClientQLock) ;
 	    // push the unsigned char in Q
 	    udpMessageClientQ.push_back(mes) ;

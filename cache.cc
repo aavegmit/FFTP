@@ -62,7 +62,7 @@ void writeToCache(uint64_t sequenceNum, udpMessage mes, bool packetType){
 	}
     }
     else{
-//	printf("Writing packet to cache...%llu, %lu\n", mes.sequenceNum, mes.data_len);
+	printf("Writing packet to cache...%llu, %lu\n", mes.sequenceNum, mes.data_len);
 	udpPacketCache[sequenceNum] = mes;
 	if(packetType == RANDOM_PACKET){
 	    addToCachedUDPRandomPacketList(sequenceNum);
