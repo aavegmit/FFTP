@@ -116,7 +116,7 @@ void handleFileInfo(unsigned char *buffer, uint32_t data_len){
     // Allocate memory to bitV
     printf("Initialising the bitvector..\n") ;
     bitV = (unsigned char *)malloc(objParam.noOfSeq/8+1) ;
-    memset(bitV, 0x00, objParam.noOfSeq/8 + 1) ;
+    memset(bitV, '\0', objParam.noOfSeq/8 + 1) ;
 
     //Pushing the ready message in TCP Q
     pushMessageInTCPq(0xff,NULL,0);

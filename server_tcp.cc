@@ -230,7 +230,8 @@ void handleACKlist(unsigned char *buffer, uint32_t data_len){
 //	    if(toBeSend.find(current_seq_num) == toBeSend.end()){
 
 	    if(readBit(toBeSendV, current_seq_num) == 0x00){
-		writeToCache(current_seq_num, getUDPpacketFromSeqNum(current_seq_num), LOST_PACKET ) ;
+		udpMessage mes =  getUDPpacketFromSeqNum(current_seq_num) ;
+		writeToCache(current_seq_num, mes, LOST_PACKET ) ;
 
 	        printf("Packet lost - %d\n", current_seq_num) ;
 //		toBeSend[current_seq_num] = true ;
