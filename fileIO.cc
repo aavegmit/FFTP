@@ -70,18 +70,39 @@ void unloadFileMap(){
 }*/
 
 void pushSequenceNumberInList(uint64_t sequenceNum){
-    static int myTurn = 0;
-    if(myTurn == NUM_UDP_CONNECTION){
-        myTurn = 0;
-    }
+//    static int myTurn = 0;
+//    if(myTurn == NUM_UDP_CONNECTION){
+//        myTurn = 0;
+//    }
+    int myTurn = sequenceNum * NUM_UDP_CONNECTION / (objParam.noOfSeq - 1) ;
 
     pthread_mutex_lock(&sequenceNumberListLock[myTurn]);
-    sequenceNumberList[myTurn].push_front(sequenceNum);
+    sequenceNumberList[myTurn].push_back(sequenceNum);
     pthread_cond_signal(&sequenceNumberListCV[myTurn]);
-    myTurn++;
-    pthread_mutex_unlock(&sequenceNumberListLock[myTurn-1]);
-
+    printf("Pushing %d\n", sequenceNum) ;
+//    myTurn++;
+    pthread_mutex_unlock(&sequenceNumberListLock[myTurn]);
 }
+
+void pushSequenceNumberListInList(list<uint64_t> sequenceNumList){
+//    static int myTurn = 0;
+//    if(myTurn == NUM_UDP_CONNECTION){
+//        myTurn = 0;
+//    }
+
+    uint64_t sequenceNum = sequenceNumList.front() ;
+    int myTurn = sequenceNum * NUM_UDP_CONNECTION / (objParam.noOfSeq - 1) ;
+    printf("%d\n", myTurn) ;
+
+    pthread_mutex_lock(&sequenceNumberListLock[myTurn]);
+    while(sequenceNumList.size() > 0){
+	sequenceNumberList[myTurn].push_back(sequenceNumList.front());
+	sequenceNumList.pop_front() ;
+    }
+    pthread_cond_signal(&sequenceNumberListCV[myTurn]);
+    pthread_mutex_unlock(&sequenceNumberListLock[myTurn]);
+}
+
 void printMMapToFile(){
 
     FILE *f = fopen("temp", "wb");

@@ -46,11 +46,12 @@ void *prepareBlockThread(void *args){
                 sequenceNum = m->startSeqNum++;
                 alreadySet = true;
             }
-            else{
+	    else{
 		if(noOfAckSent[m->myId] == noOfAckRecd[m->myId]){
 		    sendAckRequest(uptoPacketSent[m->myId], m->startSeqNum - 1) ;
 		    ++noOfAckSent[m->myId] ;
-                }
+		}
+		printf("Going on wait\n") ;
                 pthread_cond_wait(&sequenceNumberListCV[m->myId], &sequenceNumberListLock[m->myId]);
             }
             if(shutDownFlag){
@@ -67,6 +68,7 @@ void *prepareBlockThread(void *args){
         //    	printf("%d out of seq list\n", sequenceNum) ;
 
 
+//	printf("Sending %d\n", sequenceNum) ;
         //first check in cache
         if(inUDPpacketCache(sequenceNum)){
             pthread_mutex_lock(&udpPacketCacheLock);

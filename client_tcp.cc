@@ -138,7 +138,7 @@ void handleAckRequest(unsigned char *buffer, uint32_t data_len){
     uint64_t seq_num, last_seq_num ;
     memcpy(&seq_num, buffer, 8) ;
     memcpy(&last_seq_num, buffer+8, 8) ;
-//    printf("Server needs a ACK list %d - %d\n", seq_num, last_seq_num) ;
+    printf("Server needs a ACK list %d - %d\n", seq_num, last_seq_num) ;
     // get bitvector
     int part_bv_len = (last_seq_num - seq_num)/8 + 17 ;
     unsigned char *part_bv = (unsigned char *)malloc(part_bv_len) ;

@@ -72,9 +72,9 @@ void *UDPreadThread(void *temp){
 	    if(shutDownFlag)
 		pthread_exit(0);
 	}
-//	        printf("Packet %d - %d received by %d \n",mes.sequenceNum,mes.data_len, udpSocketDataObj->sockfd);
 
 	if (readBit(bitV, mes.sequenceNum) == 0x00){
+//	        printf("Packet %d - %d received by %d \n",mes.sequenceNum,mes.data_len, udpSocketDataObj->sockfd);
 	    writeBit(bitV, mes.sequenceNum, 0x01) ;
 	    pthread_mutex_lock(&udpMessageClientQLock) ;
 	    // push the unsigned char in Q

@@ -89,4 +89,5 @@ int loadMMapForFile(unsigned char[]);
 void unloadMMapForFile(int);
 
 void pushSequenceNumberInList(uint64_t) ;
+void pushSequenceNumberListInList(list<uint64_t>) ;
 #endif
