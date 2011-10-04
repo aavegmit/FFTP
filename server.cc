@@ -39,7 +39,7 @@ void *prepareBlockThread(void *args){
     noOfPacketsSent[m->myId] = 0;
 
 
-    printf("PrepareThread...%d, %llu\n", m->myId, m->startSeqNum);
+//    printf("PrepareThread...%d, %llu\n", m->myId, m->startSeqNum);
     while(!shutDownFlag){
         pthread_mutex_lock(&sequenceNumberListLock[m->myId]);
         if(sequenceNumberList[m->myId].size() == 0){
@@ -49,9 +49,9 @@ void *prepareBlockThread(void *args){
             }
 	    else{
 		if(noOfAckSent[m->myId] == noOfAckRecd[m->myId]){
-		    if(uptoPacketSent[m->myId] == m->endSeqNum){
-			printf("%d is done\n", m->myId) ;
-		    }
+//		    if(uptoPacketSent[m->myId] == m->endSeqNum){
+//			printf("%d is done\n", m->myId) ;
+//		    }
 		    if(uptoPacketSent[m->myId] == startSeqForAck )
 			sendAckRequest(uptoPacketSent[m->myId]+1, m->startSeqNum - 1) ;
 		    else

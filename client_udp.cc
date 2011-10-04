@@ -77,9 +77,9 @@ void *UDPreadThread(void *temp){
 
 	if (readBit(bitV, mes.sequenceNum) == 0x00){
 	    writeBit(bitV, mes.sequenceNum, 0x01) ;
-	    if(mes.data_len < MAXDATASIZE){
-		printf("%d is screwed\n", mes.sequenceNum) ;
-	    }
+//	    if(mes.data_len < MAXDATASIZE){
+//		printf("%d is screwed\n", mes.sequenceNum) ;
+//	    }
 //	    printf("Packet %d - %d received by %d\n",mes.sequenceNum,mes.data_len, udpSocketDataObj->sockfd);
 	    //	    for(int i = 0 ; i < mes.data_len - 26 ; i=i+16){
 //		if(memcmp(&mes.buffer[i], tempBuf, 16) == 0){
@@ -109,6 +109,6 @@ void *UDPreadThread(void *temp){
 // implement it now
 void *UDPwriteThread(void *){
 
-    printf("In the client's UDP write mode.....\n");
+//    printf("In the client's UDP write mode.....\n");
     pthread_exit(0);
 }

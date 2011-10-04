@@ -183,8 +183,8 @@ void *WriteToFileThread(void *args){
     }
     unloadMMapForFile(fd);
     printf("WriteToFile thread exiting at client...\n");
-    printf("Duplicate Packets count %d\n", dropPacketCount) ;
-    printf("Write to file thread wait count %d\n", count1) ;
+//    printf("Duplicate Packets count %d\n", dropPacketCount) ;
+//    printf("Write to file thread wait count %d\n", count1) ;
     shutDown();
     exit(0) ;
 }

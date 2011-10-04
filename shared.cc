@@ -80,7 +80,7 @@ void *TCPreadThread(void *args){
         memset(header, 0x00, TCP_HEADER_SIZE) ;
         numbytes = (int)read(sockfd, header, TCP_HEADER_SIZE) ;
         if (numbytes != TCP_HEADER_SIZE || shutDownFlag){
-            fprintf(stderr, "Error in HEADER\n") ; 
+//            fprintf(stderr, "Error in HEADER\n") ; 
             displayStats();
             exit(0);
             //pthread_exit(0);
@@ -108,7 +108,7 @@ void *TCPreadThread(void *args){
 }
 
 void *TCPwriteThread(void *args){
-    printf("In TCP write thread...\n") ;
+//    printf("In TCP write thread...\n") ;
     long sockfd = (long)args ;
     tcpMessage mes ;
 
@@ -135,7 +135,7 @@ void *TCPwriteThread(void *args){
 
         int numBytes = (int)write(sockfd, mes.packet, (int)mes.len) ;
         if(numBytes != (int)mes.len || shutDownFlag){
-            fprintf(stderr, "TCP write error\n") ;
+  //          fprintf(stderr, "TCP write error\n") ;
             pthread_exit(0);
         }
     }
@@ -195,12 +195,12 @@ udpMessage getUDPpacketFromData(uint64_t sequenceNum, uint32_t size, unsigned ch
 
 
 void displayStats(){
-    printf("Displaying stats..\n") ;
-    printf("#Total transmissions %ld\n", noOfPacketsSent ) ;
-    printf("#Udp server Wait count\n") ;
-    for(int i = 0 ; i < NUM_UDP_CONNECTION ; ++i){
-        printf("\tUdp server %d - %ld\n",i, udpSendWaitCount[i]) ;
-    }
+//    printf("Displaying stats..\n") ;
+//    printf("#Total transmissions %ld\n", noOfPacketsSent ) ;
+//    printf("#Udp server Wait count\n") ;
+//    for(int i = 0 ; i < NUM_UDP_CONNECTION ; ++i){
+//        printf("\tUdp server %d - %ld\n",i, udpSendWaitCount[i]) ;
+//    }
 }
 
 //Final shutdown function

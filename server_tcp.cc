@@ -177,7 +177,7 @@ void handleFileName(unsigned char *buffer, uint32_t data_len){
 
     if(r > 0)
         q+=1;
-    printf("Q IS: %llu\n", q);
+//    printf("Q IS: %llu\n", q);
     toBeSendV = (unsigned char *)malloc(q/8+2) ;
     memset(toBeSendV, 0x00, q/8+2) ;
     objParam.noOfSeq = q ;
@@ -197,7 +197,7 @@ void handleFileName(unsigned char *buffer, uint32_t data_len){
         else
             m->endSeqNum = (q*(i+1) - 1) ;
 
-        printf("PrepareBlockThread is creating: %d, startSeq: %llu, endSeqNum: %llu\n", m->myId, m->startSeqNum, m->endSeqNum);
+//        printf("PrepareBlockThread is creating: %d, startSeq: %llu, endSeqNum: %llu\n", m->myId, m->startSeqNum, m->endSeqNum);
         pthread_create(&PrepareBlockThread, NULL, prepareBlockThread, (void *)m);
     }
 }
@@ -217,7 +217,7 @@ void handleACKlist(unsigned char *buffer, uint32_t data_len){
     if(sender_num >= NUM_UDP_CONNECTION)
 	sender_num = NUM_UDP_CONNECTION - 1 ;
 //    int sender_num = seq_num * NUM_UDP_CONNECTION / (objParam.noOfSeq - 1) ;
-        printf("Server receives a ACK list (%d) from the client...%llu - %llu %d\n", sender_num ,seq_num, last_seq_num ,data_len) ;
+//        printf("Server receives a ACK list (%d) from the client...%llu - %llu %d\n", sender_num ,seq_num, last_seq_num ,data_len) ;
     uint64_t seq_num_mod = (seq_num/8)*8 ;
     for(uint64_t i = (seq_num%8) ; i <= last_seq_num - seq_num_mod ; ++i){
         current_seq_num = seq_num_mod + i ;
