@@ -244,9 +244,9 @@ void handleACKlist(unsigned char *buffer, uint32_t data_len){
 //		else{
 //		    pushSequenceNumberInList(current_seq_num) ;
 //		}
-		++groupPush ;
-		if(groupPush % 4 == 0)
-		    lossPackets.push_front(current_seq_num) ;
+//		++groupPush ;
+//		if(groupPush % 4 == 0)
+//		    lossPackets.push_front(current_seq_num) ;
 		++noOfLossPackets ;
 	    }
         }
