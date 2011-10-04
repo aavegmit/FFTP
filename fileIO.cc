@@ -74,12 +74,15 @@ void pushSequenceNumberInList(uint64_t sequenceNum){
 //    if(myTurn == NUM_UDP_CONNECTION){
 //        myTurn = 0;
 //    }
-    int myTurn = sequenceNum * NUM_UDP_CONNECTION / (objParam.noOfSeq - 1) ;
+//    int myTurn = sequenceNum * NUM_UDP_CONNECTION / (objParam.noOfSeq - 1) ;
+    int myTurn = sequenceNum / ((int)(objParam.noOfSeq / NUM_UDP_CONNECTION )) ;
+    if(myTurn >= NUM_UDP_CONNECTION)
+	myTurn = NUM_UDP_CONNECTION - 1 ;
 
     pthread_mutex_lock(&sequenceNumberListLock[myTurn]);
     sequenceNumberList[myTurn].push_back(sequenceNum);
     pthread_cond_signal(&sequenceNumberListCV[myTurn]);
-    printf("Pushing %d\n", sequenceNum) ;
+//    printf("Pushing %d\n", sequenceNum) ;
 //    myTurn++;
     pthread_mutex_unlock(&sequenceNumberListLock[myTurn]);
 }

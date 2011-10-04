@@ -30,7 +30,7 @@ void writeBit(unsigned char *str, uint64_t location, unsigned char value){
 }
 
 void getBitVector(unsigned char *str, uint64_t seq_num, uint64_t last_seq_num, unsigned char *buffer){
-	memcpy(buffer, str + seq_num/8, (last_seq_num - seq_num) / 8 + 1) ;
+	memcpy(buffer, str + seq_num/8, (last_seq_num - (seq_num/8)*8) / 8 + 1) ;
 }
 
 bool isBitVectorSet(unsigned char *str){

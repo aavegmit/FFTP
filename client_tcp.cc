@@ -115,8 +115,8 @@ void handleFileInfo(unsigned char *buffer, uint32_t data_len){
     cout << "no of packets to receive from the server " << objParam.noOfSeq << endl;
     // Allocate memory to bitV
     printf("Initialising the bitvector..\n") ;
-    bitV = (unsigned char *)malloc(objParam.noOfSeq/8+1) ;
-    memset(bitV, '\0', objParam.noOfSeq/8 + 1) ;
+    bitV = (unsigned char *)malloc(objParam.noOfSeq/8+2) ;
+    memset(bitV, '\0', objParam.noOfSeq/8 + 2) ;
 
     //Pushing the ready message in TCP Q
     pushMessageInTCPq(0xff,NULL,0);
@@ -138,9 +138,9 @@ void handleAckRequest(unsigned char *buffer, uint32_t data_len){
     uint64_t seq_num, last_seq_num ;
     memcpy(&seq_num, buffer, 8) ;
     memcpy(&last_seq_num, buffer+8, 8) ;
-    printf("Server needs a ACK list %d - %d\n", seq_num, last_seq_num) ;
+//    printf("Server needs a ACK list %d - %d\n", seq_num, last_seq_num) ;
     // get bitvector
-    int part_bv_len = (last_seq_num - seq_num)/8 + 17 ;
+    int part_bv_len = (last_seq_num - (seq_num/8)*8)/8 + 17 ;
     unsigned char *part_bv = (unsigned char *)malloc(part_bv_len) ;
     if(last_seq_num != objParam.noOfSeq - 1)
 	usleep(1000*ACK_RESPONSE_DELAY) ;

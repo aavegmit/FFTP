@@ -178,8 +178,8 @@ void handleFileName(unsigned char *buffer, uint32_t data_len){
     if(r > 0)
         q+=1;
     printf("Q IS: %llu\n", q);
-    toBeSendV = (unsigned char *)malloc(q/8+1) ;
-    memset(toBeSendV, 0x00, q/8+1) ;
+    toBeSendV = (unsigned char *)malloc(q/8+2) ;
+    memset(toBeSendV, 0x00, q/8+2) ;
     objParam.noOfSeq = q ;
 
     r = q%NUM_UDP_CONNECTION;
@@ -209,6 +209,7 @@ void handleFileName(unsigned char *buffer, uint32_t data_len){
 // Clear out the cache for which packets has been received
 void handleACKlist(unsigned char *buffer, uint32_t data_len){
     list<uint64_t> lossPackets ;
+    int groupPush = 0 ;
     uint64_t seq_num, last_seq_num, current_seq_num ;
     memcpy(&seq_num, buffer, 8) ;
     memcpy(&last_seq_num, buffer + 8, 8) ;
@@ -216,12 +217,12 @@ void handleACKlist(unsigned char *buffer, uint32_t data_len){
     if(sender_num >= NUM_UDP_CONNECTION)
 	sender_num = NUM_UDP_CONNECTION - 1 ;
 //    int sender_num = seq_num * NUM_UDP_CONNECTION / (objParam.noOfSeq - 1) ;
-        printf("Server receives a ACK list (%d) from the client...%llu - %llu\n", sender_num ,seq_num, last_seq_num) ;
+        printf("Server receives a ACK list (%d) from the client...%llu - %llu %d\n", sender_num ,seq_num, last_seq_num ,data_len) ;
     uint64_t seq_num_mod = (seq_num/8)*8 ;
     for(uint64_t i = (seq_num%8) ; i <= last_seq_num - seq_num_mod ; ++i){
         current_seq_num = seq_num_mod + i ;
 	if(readBit(buffer+16, i) == 0x01){
-	    printf("Packet received - %ld, upto %ld\n", current_seq_num, uptoPacketSent[sender_num]) ;
+//	    printf("Packet received - %ld, upto %ld\n", current_seq_num, uptoPacketSent[sender_num]) ;
 	    removeFromUDPPacketCache(current_seq_num) ;
 	    if (current_seq_num == uptoPacketSent[sender_num] + 1)
                 uptoPacketSent[sender_num] = current_seq_num ;
@@ -231,14 +232,21 @@ void handleACKlist(unsigned char *buffer, uint32_t data_len){
 
 	    if(readBit(toBeSendV, current_seq_num) == 0x00){
 		udpMessage mes =  getUDPpacketFromSeqNum(current_seq_num) ;
-		writeToCache(current_seq_num, mes, LOST_PACKET ) ;
+//		writeToCache(current_seq_num, mes, LOST_PACKET ) ;
 
-	        printf("Packet lost - %d\n", current_seq_num) ;
+//	        printf("Packet lost - %d\n", current_seq_num) ;
 //		toBeSend[current_seq_num] = true ;
 
 		writeBit(toBeSendV, current_seq_num, 0x01) ;
-		lossPackets.push_back(current_seq_num) ;
-//		pushSequenceNumberInList(current_seq_num) ;
+//		if(groupPush == 0 || groupPush % 10 != 0 || groupPush != 1){
+		    lossPackets.push_back(current_seq_num) ;
+//		}
+//		else{
+//		    pushSequenceNumberInList(current_seq_num) ;
+//		}
+		++groupPush ;
+		if(groupPush % 4 == 0)
+		    lossPackets.push_front(current_seq_num) ;
 		++noOfLossPackets ;
 	    }
         }
@@ -278,7 +286,7 @@ int rv = 0;
 void sendAckRequest(int64_t seq_num, uint64_t last_seq_num){
     if(seq_num == -1)
         seq_num = 0 ;
-    printf("Sending Ack request %d - %d\n", seq_num, last_seq_num) ;
+//    printf("Sending Ack request %d - %d\n", seq_num, last_seq_num) ;
     unsigned char *buffer = (unsigned char *)malloc(16) ;
     if (last_seq_num > seq_num + 10400)
         last_seq_num = seq_num + 10400 ;

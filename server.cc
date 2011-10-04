@@ -77,15 +77,15 @@ void *prepareBlockThread(void *args){
 
 //	printf("Sending %d\n", sequenceNum) ;
         //first check in cache
-        if(inUDPpacketCache(sequenceNum)){
-            pthread_mutex_lock(&udpPacketCacheLock);
-            mes = udpPacketCache[sequenceNum];
-            memcpy(fileData, mes.buffer, mes.data_len);
-	    printf("Reading from cache - %d %d\n", mes.sequenceNum, mes.data_len) ;
-	    size = mes.data_len ;
-            pthread_mutex_unlock(&udpPacketCacheLock);
-        }
-        else{
+//        if(inUDPpacketCache(sequenceNum)){
+//            pthread_mutex_lock(&udpPacketCacheLock);
+//            mes = udpPacketCache[sequenceNum];
+//            memcpy(fileData, mes.buffer, mes.data_len);
+////	    printf("Reading from cache - %d %d\n", mes.sequenceNum, mes.data_len) ;
+//	    size = mes.data_len ;
+//            pthread_mutex_unlock(&udpPacketCacheLock);
+//        }
+//        else{
             //READ from mmap
             getDataFromFile(sequenceNum, fileData, &size);
 
@@ -96,8 +96,8 @@ void *prepareBlockThread(void *args){
 
             //write to cache skipped
             //printf("Writing in Cache: %d\n", sequenceNum);
-            writeToCache(sequenceNum, mes, RANDOM_PACKET);	
-        }
+//            writeToCache(sequenceNum, mes, RANDOM_PACKET);	
+//        }
 
         pushMessageInUDPq(sequenceNum, size, fileData, m->myId);
         // Increase the number of packets for ACK handling
