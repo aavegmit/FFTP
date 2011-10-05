@@ -210,51 +210,55 @@ void handleFileName(unsigned char *buffer, uint32_t data_len){
 void handleACKlist(unsigned char *buffer, uint32_t data_len){
     list<uint64_t> lossPackets ;
     int groupPush = 0 ;
+    long localLossCount=0 ;
     uint64_t seq_num, last_seq_num, current_seq_num ;
     memcpy(&seq_num, buffer, 8) ;
     memcpy(&last_seq_num, buffer + 8, 8) ;
     int sender_num = seq_num / ((int)(objParam.noOfSeq / NUM_UDP_CONNECTION )) ;
     if(sender_num >= NUM_UDP_CONNECTION)
 	sender_num = NUM_UDP_CONNECTION - 1 ;
-//    int sender_num = seq_num * NUM_UDP_CONNECTION / (objParam.noOfSeq - 1) ;
-//        printf("Server receives a ACK list (%d) from the client...%llu - %llu %d\n", sender_num ,seq_num, last_seq_num ,data_len) ;
+        printf("Server receives a ACK list (%d) from the client...%llu - %llu %d\n", sender_num ,seq_num, last_seq_num ,data_len) ;
     uint64_t seq_num_mod = (seq_num/8)*8 ;
     for(uint64_t i = (seq_num%8) ; i <= last_seq_num - seq_num_mod ; ++i){
         current_seq_num = seq_num_mod + i ;
 	if(readBit(buffer+16, i) == 0x01){
-//	    printf("Packet received - %ld, upto %ld\n", current_seq_num, uptoPacketSent[sender_num]) ;
+	    printf("Packet received - %ld, upto %ld\n", current_seq_num, uptoPacketSent[sender_num]) ;
 	    removeFromUDPPacketCache(current_seq_num) ;
 	    if (current_seq_num == uptoPacketSent[sender_num] + 1)
                 uptoPacketSent[sender_num] = current_seq_num ;
         }
-        else{
-//	    if(toBeSend.find(current_seq_num) == toBeSend.end()){
+	else{
+	    //	    if(toBeSend.find(current_seq_num) == toBeSend.end()){
 
 	    if(readBit(toBeSendV, current_seq_num) == 0x00){
 		udpMessage mes =  getUDPpacketFromSeqNum(current_seq_num) ;
-//		writeToCache(current_seq_num, mes, LOST_PACKET ) ;
+		//		writeToCache(current_seq_num, mes, LOST_PACKET ) ;
 
-//	        printf("Packet lost - %d\n", current_seq_num) ;
-//		toBeSend[current_seq_num] = true ;
+		printf("Packet lost - %d\n", current_seq_num) ;
+		//		toBeSend[current_seq_num] = true ;
 
 		writeBit(toBeSendV, current_seq_num, 0x01) ;
-//		if(groupPush == 0 || groupPush % 10 != 0 || groupPush != 1){
-		    lossPackets.push_back(current_seq_num) ;
-//		}
-//		else{
-//		    pushSequenceNumberInList(current_seq_num) ;
-//		}
-//		++groupPush ;
-//		if(groupPush % 4 == 0)
-//		    lossPackets.push_front(current_seq_num) ;
+		//		if(groupPush == 0 || groupPush % 10 != 0 || groupPush != 1){
+		lossPackets.push_back(current_seq_num) ;
+		//		}
+		//		else{
+		//		    pushSequenceNumberInList(current_seq_num) ;
+		//		}
+		//		++groupPush ;
+		//		if(groupPush % 4 == 0)
+		//		    lossPackets.push_front(current_seq_num) ;
+		++localLossCount;
 		++noOfLossPackets ;
 	    }
-        }
-    }
-//    if(uptoPacketSent[sender_num] == objParam.noOfSeq - 1){
-//        displayStats() ;
-//        shutDownFlag = true ;
-//    }
+	}
+	}
+
+	printf("LOSS COUNT %ld\t %d%\n", localLossCount, localLossCount*100/(last_seq_num - seq_num)) ;
+	if(localLossCount*100/(last_seq_num - seq_num) > LOSS_RATIO + LOSS_LIMIT)
+	    slowDown = true ;
+	else
+	    slowDown = false ;
+
     uint64_t lossSeqNo ;
     pthread_mutex_lock(&sequenceNumberListLock[sender_num]);
     if(lossPackets.size() != 0){

@@ -84,7 +84,7 @@ void *UDPwriteThread(void *temp){
 
 //        /*********************************/
 //        if(counter % 20 == 0 && counter != 0)
-//            usleep(10000);
+//          usleep(1000);
 //        /*******************************/
 //
 //        counter++;

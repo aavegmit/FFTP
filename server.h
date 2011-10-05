@@ -49,4 +49,5 @@ void sendAckRequest(int64_t, uint64_t) ;
 udpMessage getUDPpacketFromSeqNum(uint64_t) ;
 bool shouldSendAck(long, int) ;
 void startUDPServerThreads();
+extern bool slowDown ;
 #endif

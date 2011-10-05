@@ -22,7 +22,7 @@ long noOfPacketsSent[NUM_UDP_CONNECTION];
 long uptoPacketSent[NUM_UDP_CONNECTION];
 long noOfAckSent[NUM_UDP_CONNECTION];
 long noOfAckRecd[NUM_UDP_CONNECTION];
-long noOfLossPackets ;
+long long noOfLossPackets ;
 long udpSendWaitCount[NUM_UDP_CONNECTION];
 
 int udpPortList[20] = {42000, 42001, 42002, 42003, 42004, 42005, 42006, 42007, 42008, 42009, 42010, 42011, 42012, 42013, 42014, 42015, 42016, 42017, 42018, 42019};
@@ -195,12 +195,12 @@ udpMessage getUDPpacketFromData(uint64_t sequenceNum, uint32_t size, unsigned ch
 
 
 void displayStats(){
-//    printf("Displaying stats..\n") ;
-//    printf("#Total transmissions %ld\n", noOfPacketsSent ) ;
-//    printf("#Udp server Wait count\n") ;
-//    for(int i = 0 ; i < NUM_UDP_CONNECTION ; ++i){
-//        printf("\tUdp server %d - %ld\n",i, udpSendWaitCount[i]) ;
-//    }
+    printf("Displaying stats..\n") ;
+    printf("Total packets lost - %lld\n", noOfLossPackets) ;
+    printf("#Udp server\n") ;
+    for(int i = 0 ; i < NUM_UDP_CONNECTION ; ++i){
+        printf("\tUdp server %d - Wait count %lld, Transmitted - %lld\n",i, udpSendWaitCount[i], noOfPacketsSent[i]) ;
+    }
 }
 
 //Final shutdown function

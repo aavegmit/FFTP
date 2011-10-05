@@ -1,14 +1,18 @@
 #include "server.h"
 #include <sys/time.h>
 
+bool slowDown;
+
 int main(int argc, char **argv){
 
     int rv = 0;
 //    noOfPacketsSent = 0 ;
 //    uptoPacketSent = -1 ;
     noOfLossPackets = 0 ;
+    slowDown = true ;
 
     init() ;
+
 
     // Thread - Start TCP server
     pthread_t tcpServerThread;	
@@ -39,7 +43,7 @@ void *prepareBlockThread(void *args){
     noOfPacketsSent[m->myId] = 0;
 
 
-//    printf("PrepareThread...%d, %llu\n", m->myId, m->startSeqNum);
+    printf("PrepareThread...%d, %llu\n", m->myId, m->startSeqNum);
     while(!shutDownFlag){
         pthread_mutex_lock(&sequenceNumberListLock[m->myId]);
         if(sequenceNumberList[m->myId].size() == 0){
@@ -71,8 +75,12 @@ void *prepareBlockThread(void *args){
             sequenceNumberList[m->myId].pop_front();
 	    writeBit(toBeSendV, sequenceNum, 0x00) ;
         }
-        pthread_mutex_unlock(&sequenceNumberListLock[m->myId]);
+	pthread_mutex_unlock(&sequenceNumberListLock[m->myId]);
+//	if(slowDown)
+//	    usleep(1000*SLOW_SENDER) ;
         //    	printf("%d out of seq list\n", sequenceNum) ;
+	while(udpMessageQ[m->myId].size() > MAX_UDP_Q_SIZE)
+    		usleep(10000) ;	    
 
 
 //	printf("Sending %d\n", sequenceNum) ;
